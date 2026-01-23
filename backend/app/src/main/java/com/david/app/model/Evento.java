@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Document(collection = "eventos")
 @Data
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -29,4 +31,13 @@ public class Evento {
      * Ej: "blue", "orange", "green", "purple"
      */
     private String color;
+
+    private String descripcion;
+    private Double presupuesto;
+    private Integer tecnicos;
+    private List<EventoMaterial> materiales;
+    private Integer dias;
+    private Integer jornadas;
+    private String modoCalculo;
+    private List<EventoTecnico> tecnicosDetalle;
 }

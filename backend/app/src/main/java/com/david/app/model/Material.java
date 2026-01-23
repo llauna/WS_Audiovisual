@@ -14,6 +14,10 @@ public class Material {
     private String categoria;
     private Integer stockTotal;
     private Integer stockDisponible;
+    private Integer stockReservado;
+    private Integer stockReparacion;
+    private Double tarifaDia;
+    private String almacen;
     private String ubicacionAlmacen;
     private String estado;
 }

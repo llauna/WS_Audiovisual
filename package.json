@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "frontend": "cd frontend && npm start",
-    "backend": "cd backend/app && mvnw.cmd spring-boot:run",
-    "start": "concurrently \"cd backend/app && mvnw.cmd spring-boot:run\" \"cd frontend && ng serve\""
+    "backend": "cd backend/app && mvn spring-boot:run",
+    "start": "concurrently \"cd backend/app && mvn spring-boot:run\" \"cd frontend && ng serve\""
   },
   "devDependencies": {
     "concurrently": "^8.0.1"

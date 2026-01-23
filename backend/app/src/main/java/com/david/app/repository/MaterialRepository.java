@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MaterialRepository extends MongoRepository<Material, String> {
-    // Aquí podremos añadir búsquedas personalizadas por categoría más adelante
+    boolean existsByNombreAndAlmacen(String nombre, String almacen);
+    boolean existsByNombreAndAlmacenAndIdNot(String nombre, String almacen, String id);
 }

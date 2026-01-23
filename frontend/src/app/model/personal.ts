@@ -6,7 +6,8 @@ export interface Personal {
   cargo: string;
   telefono: string;
   email: string;
-  tipoContrato: 'Plantilla' | 'Autónomo' | 'Subcontratado';
+  tipoContrato: 'Plantilla' | 'Autonomo' | 'Subcontratado';
   empresa: string;
   estado: string;
+  tarifaHora?: number;
 }

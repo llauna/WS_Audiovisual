@@ -1,16 +1,17 @@
 <div class="layout-container">
   <!-- NAVBAR SIMPLIFICADO -->
   <nav class="navbar">
-    <div class="nav-logo" routerLink="/" style="cursor:pointer">🎬 AV-Manager</div>
-    <ul class="nav-links">
-      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a></li>
-      <!-- Hemos eliminado el resto de enlaces directos para usar las cards del dashboard -->
-    </ul>
+    <div class="nav-logo" routerLink="/" style="cursor:pointer">AV-Manager</div>
+    <ul class="nav-links"></ul>
     <div class="nav-status">{{ mensajeBackend }}</div>
   </nav>
 
-  <!-- CONTENIDO DINÁMICO -->
+  <!-- CONTENIDO DINAMICO -->
   <main class="content">
     <router-outlet></router-outlet>
   </main>
+
+  <footer class="footer">
+    <div>AV-Manager - Sistema de gestion audiovisual</div>
+  </footer>
 </div>

@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+**/target/
+**/build/
+**/.gradle/
+**/*.jar
+**/*.war
+**/*.ear
+**/*.zip
+**/dependency-reduced-pom.xml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.apt_generated/
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+application-*.properties
+!application.properties
+!application-example.properties
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+**/log/
+**/logs/
+
+# Build outputs
+dist/
+build/
+.cache/
+**/out/
+
+# Test coverage
+coverage/
+.nyc_output/
+**/target/site/jacoco/
+
+# Spring Boot
+**/spring-boot-devtools/
+
+# Angular specific
+.angular/cache
+.angular/compiler

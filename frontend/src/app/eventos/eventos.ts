@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService } from '../services/api.service';
-import { Evento } from '../model/evento';
+import { Evento, EventoTecnico } from '../model/evento';
+import { Material } from '../model/material';
+import { Personal } from '../model/personal';
 
 interface CalendarCell {
   date: Date | null;      // null = hueco
@@ -12,46 +16,48 @@ interface CalendarCell {
 @Component({
   selector: 'app-eventos',
   standalone: true,
-  imports: [CommonModule],
-  template: `
+  imports: [CommonModule, FormsModule, RouterLink],
+    template: `
     <div class="eventos-container">
       <header class="section-header">
         <div>
-          <h2>📅 Agenda de Eventos</h2>
+          <h2>Agenda de Eventos</h2>
           <p class="muted">Vista mensual (persistente en MongoDB)</p>
         </div>
 
         <div class="header-actions">
-          <button class="btn-primary" (click)="addQuickEvent()">+ Nuevo Evento</button>
+          <a class="btn-secondary" routerLink="/">Inicio</a>
+          <button class="btn-primary" (click)="openNewEventModal()">+ Nuevo Evento</button>
         </div>
       </header>
 
       <div class="calendar-layout">
         <aside class="event-sidebar card">
-          <h3>Próximos 7 días</h3>
+          <h3>Pr&oacute;ximos 7 d&iacute;as</h3>
 
           <div class="mini-event-list" *ngIf="upcoming7.length > 0; else noUpcoming">
-            <div class="mini-event-item" *ngFor="let e of upcoming7">
+            <div class="mini-event-item" *ngFor="let e of upcoming7" (click)="openEditEvent(e)">
               <span class="date">{{ formatShortDayMonth(e.fecha) }}</span>
               <div class="info">
                 <strong>{{ e.titulo }}</strong>
-                <small *ngIf="e.ubicacion">📍 {{ e.ubicacion }}</small>
-                <small *ngIf="!e.ubicacion" class="muted">Sin ubicación</small>
+                <small *ngIf="e.ubicacion">{{ e.ubicacion }}</small>
+                <small *ngIf="!e.ubicacion" class="muted">Sin ubicaci&oacute;n</small>
               </div>
-              <button class="mini-delete" title="Eliminar" (click)="deleteEvento(e.id)">×</button>
+              <button class="mini-edit" title="Editar" (click)="$event.stopPropagation(); openEditEvent(e)">Editar</button>
+              <button class="mini-delete" title="Eliminar" (click)="$event.stopPropagation(); deleteEvento(e.id)">&times;</button>
             </div>
           </div>
 
           <ng-template #noUpcoming>
-            <p class="muted">No hay eventos en los próximos 7 días.</p>
+            <p class="muted">No hay eventos en los pr&oacute;ximos 7 d&iacute;as.</p>
           </ng-template>
         </aside>
 
         <main class="calendar-main card">
           <div class="calendar-header">
-            <button class="btn-nav" (click)="prevMonth()">‹</button>
+            <button class="btn-nav" (click)="prevMonth()">&#8249;</button>
             <h3>{{ monthLabel }}</h3>
-            <button class="btn-nav" (click)="nextMonth()">›</button>
+            <button class="btn-nav" (click)="nextMonth()">&#8250;</button>
           </div>
 
           <div class="calendar-grid">
@@ -69,13 +75,14 @@ interface CalendarCell {
                 <div
                   class="event-tag"
                   *ngFor="let ev of eventosByDate(cell.isoDate)"
+                  (click)="openEditEvent(ev)"
                   [class.blue]="ev.color==='blue'"
                   [class.orange]="ev.color==='orange'"
                   [class.green]="ev.color==='green'"
                   [class.purple]="ev.color==='purple'"
                 >
                   <span class="event-title" title="{{ ev.titulo }}">{{ ev.titulo }}</span>
-                  <button class="event-delete" title="Eliminar" (click)="deleteEvento(ev.id)">×</button>
+                  <button class="event-delete" title="Eliminar" (click)="$event.stopPropagation(); deleteEvento(ev.id)">&times;</button>
                 </div>
               </ng-container>
             </div>
@@ -90,13 +97,131 @@ interface CalendarCell {
         </main>
       </div>
     </div>
+
+    <div class="modal-backdrop" *ngIf="showModal">
+      <div class="modal">
+        <header class="modal-header">
+          <h3>{{ modalTitle }}</h3>
+          <button class="icon-btn" (click)="closeModal()">&times;</button>
+        </header>
+
+        <div class="modal-body">
+          <div class="form-grid">
+            <label>
+              T&iacute;tulo *
+              <input type="text" [(ngModel)]="newEvent.titulo" />
+            </label>
+
+            <label>
+              Fecha *
+              <input type="date" [(ngModel)]="newEvent.fecha" />
+            </label>
+
+            <label>
+              Ubicaci&oacute;n
+              <input type="text" [(ngModel)]="newEvent.ubicacion" />
+            </label>
+
+            <label>
+              Tipo *
+              <select [(ngModel)]="newEvent.tipo" (ngModelChange)="syncColorWithTipo()">
+                <option value="Evento">Evento</option>
+                <option value="Montaje">Montaje</option>
+                <option value="Ensayo">Ensayo</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </label>
+
+            <label>
+              Modo calculo
+              <select [(ngModel)]="newEvent.modoCalculo">
+                <option value="Dias">Dias</option>
+                <option value="Jornadas">Jornadas</option>
+              </select>
+            </label>
+
+            <label>
+              Dias
+              <input type="number" min="0" step="1" [(ngModel)]="newEvent.dias" />
+            </label>
+
+            <label>
+              Jornadas
+              <input type="number" min="0" step="1" [(ngModel)]="newEvent.jornadas" />
+            </label>
+
+            <label class="span-2">
+              Descripci&oacute;n
+              <textarea rows="3" [(ngModel)]="newEvent.descripcion"></textarea>
+            </label>
+
+            <label>
+              Presupuesto (&euro;)
+              <input type="number" min="0" step="0.01" [(ngModel)]="newEvent.presupuesto" />
+            </label>
+
+            <label>
+              N&ordm; t&eacute;cnicos
+              <input type="number" min="0" step="1" [(ngModel)]="newEvent.tecnicos" />
+            </label>
+          </div>
+
+          <div class="summary">
+            <div><strong>Presupuesto calculado:</strong> {{ presupuestoCalculado | number:'1.2-2' }}</div>
+          </div>
+
+          <div class="materials">
+            <div class="materials-header">
+              <h4>Material necesario</h4>
+              <button class="btn-secondary" (click)="addMaterialRow()">+ A&ntilde;adir material</button>
+            </div>
+
+            <div class="material-row" *ngFor="let m of newEvent.materiales; let i = index">
+              <select [(ngModel)]="m.materialId" (ngModelChange)="onMaterialChange(i)">
+                <option value="">Selecciona material</option>
+                <option *ngFor="let mat of materiales" [value]="mat.id">{{ mat.nombre }} ({{ mat.almacen }})</option>
+              </select>
+              <input type="number" min="1" step="1" placeholder="Cantidad" [(ngModel)]="m.cantidad" />
+              <button class="icon-btn danger" title="Eliminar" (click)="removeMaterialRow(i)">&times;</button>
+            </div>
+          </div>
+
+          <div class="materials">
+            <div class="materials-header">
+              <h4>Tecnicos necesarios</h4>
+              <button class="btn-secondary" (click)="addTecnicoRow()">+ A&ntilde;adir tecnico</button>
+            </div>
+
+            <div class="material-row" *ngFor="let t of newEvent.tecnicosDetalle; let i = index">
+              <select [(ngModel)]="t.personalId" (ngModelChange)="onTecnicoChange(i)">
+                <option value="">Selecciona tecnico</option>
+                <option *ngFor="let p of personal" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
+              </select>
+              <input type="number" min="0" step="0.25" placeholder="Horas" [(ngModel)]="t.horas" />
+              <button class="icon-btn danger" title="Eliminar" (click)="removeTecnicoRow(i)">&times;</button>
+            </div>
+          </div>
+
+          <div class="errors" *ngIf="validationErrors.length">
+            <p *ngFor="let e of validationErrors">&bull; {{ e }}</p>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">Cancelar</button>
+          <button class="btn-primary" (click)="saveNewEvent()">Guardar</button>
+        </footer>
+      </div>
+    </div>
   `,
+
   styles: [`
     .eventos-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
     .muted { color: #7a7a7a; margin: 0.25rem 0 0; }
 
-    .calendar-layout { display: grid; grid-template-columns: 320px 1fr; gap: 2rem; }
+    .calendar-layout { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; }
     .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
     .calendar-header { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-bottom: 1.5rem; }
@@ -124,6 +249,7 @@ interface CalendarCell {
       border-radius: 6px;
       margin-top: 6px;
       color: white;
+      cursor: pointer;
     }
     .event-title { display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
     .event-delete {
@@ -144,8 +270,21 @@ interface CalendarCell {
     .green { background: #27ae60; }
     .purple { background: #8e44ad; }
 
-    .mini-event-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; margin-top: 1rem; padding-bottom: 10px; border-bottom: 1px solid #eee; align-items: center; }
+    .mini-event-item { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; margin-top: 1rem; padding: 6px 8px; border-bottom: 1px solid #eee; align-items: center; cursor: pointer; border-radius: 10px; }
+    .mini-event-item:hover { background: #f7f9fb; }
     .mini-event-item .date { background: #f0f3f5; padding: 6px 8px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; }
+    .mini-event-item .info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .mini-event-item .info strong,
+    .mini-event-item .info small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini-edit {
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .mini-edit:hover { background: #f7f7f7; }
     .mini-delete {
       border: 1px solid #e5e7eb;
       background: #fff;
@@ -167,17 +306,88 @@ interface CalendarCell {
     .pill.orange { background: #e67e22; }
     .pill.green { background: #27ae60; }
     .pill.purple { background: #8e44ad; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: #fff;
+      width: min(860px, 95vw);
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .modal-header, .modal-footer {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-footer { border-top: 1px solid #eee; border-bottom: none; }
+    .modal-body { padding: 1.5rem; }
+    .icon-btn {
+      border: none;
+      background: #f1f3f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .icon-btn.danger { background: #ffe5e5; color: #b00020; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-grid label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; color: #344054; }
+    .form-grid input, .form-grid select, .form-grid textarea {
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      font-weight: 500;
+    }
+    .span-2 { grid-column: span 2; }
+    .materials { margin-top: 0.5rem; }
+    .materials-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .material-row { display: grid; grid-template-columns: 1fr 120px 40px; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .btn-secondary {
+      background: #eef2f6;
+      color: #344054;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .summary { margin: 0.5rem 0 1rem; padding: 0.75rem 1rem; background: #f8f9fb; border-radius: 10px; }
+    .errors { margin-top: 1rem; color: #b00020; font-weight: 600; }
   `]
 })
 export class EventosComponent {
-  readonly dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  readonly dayNames = ['Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b', 'Dom'];
   currentMonth = this.startOfMonth(new Date());
   todayIso = this.toIsoDate(new Date());
 
   eventos: Evento[] = [];
+  materiales: Material[] = [];
+  personal: Personal[] = [];
+  showModal = false;
+  validationErrors: string[] = [];
+  newEvent: Evento = this.emptyEvent();
+  isEditing = false;
 
   constructor(private api: ApiService) {
     this.loadEventos();
+    this.loadMateriales();
+    this.loadPersonal();
   }
 
   loadEventos(): void {
@@ -195,26 +405,79 @@ export class EventosComponent {
     });
   }
 
-  addQuickEvent(): void {
-    console.log('CLICK + Nuevo Evento'); // <-- añade esto
+  openNewEventModal(): void {
+    this.validationErrors = [];
+    this.newEvent = this.emptyEvent();
+    this.isEditing = false;
+    this.showModal = true;
+  }
 
-    const fecha = this.toIsoDate(new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1));
+  openEditEvent(evento: Evento): void {
+    this.validationErrors = [];
+    this.newEvent = this.cloneEvent(evento);
+    this.isEditing = true;
+    this.showModal = true;
+  }
 
-    const nuevo: Evento = {
-      titulo: 'Nuevo evento',
-      ubicacion: 'Por definir',
-      fecha,
-      tipo: 'Otro',
-      color: 'purple'
-    };
+  closeModal(): void {
+    this.showModal = false;
+  }
 
-    this.api.saveEvento(nuevo).subscribe({
-      next: (saved) => {
-        console.log('Evento guardado:', saved);
+  saveNewEvent(): void {
+    this.validationErrors = this.validateNewEvent(this.newEvent);
+    if (this.validationErrors.length) return;
+
+    this.newEvent.presupuesto = this.presupuestoCalculado;
+    this.newEvent.tecnicos = this.newEvent.tecnicosDetalle?.length ?? 0;
+
+    const request = this.isEditing && this.newEvent.id
+      ? this.api.updateEvento(this.newEvent.id, this.newEvent)
+      : this.api.saveEvento(this.newEvent);
+
+    request.subscribe({
+      next: () => {
+        this.closeModal();
         this.loadEventos();
       },
       error: (e) => console.error('Error guardando evento:', e)
     });
+  }
+
+  addMaterialRow(): void {
+    if (!this.newEvent.materiales) this.newEvent.materiales = [];
+    this.newEvent.materiales.push({ materialId: '', nombre: '', cantidad: 1 });
+  }
+
+  removeMaterialRow(index: number): void {
+    this.newEvent.materiales?.splice(index, 1);
+  }
+
+  onMaterialChange(index: number): void {
+    const item = this.newEvent.materiales?.[index];
+    if (!item) return;
+    const material = this.materiales.find(m => m.id === item.materialId);
+    item.nombre = material?.nombre ?? '';
+  }
+
+  syncColorWithTipo(): void {
+    this.newEvent.color = this.colorForTipo(this.newEvent.tipo);
+  }
+
+  addTecnicoRow(): void {
+    if (!this.newEvent.tecnicosDetalle) this.newEvent.tecnicosDetalle = [];
+    this.newEvent.tecnicosDetalle.push({ personalId: '', nombre: '', horas: 0, tarifaHora: 0 });
+  }
+
+  removeTecnicoRow(index: number): void {
+    this.newEvent.tecnicosDetalle?.splice(index, 1);
+  }
+
+  onTecnicoChange(index: number): void {
+    const item = this.newEvent.tecnicosDetalle?.[index];
+    if (!item) return;
+    const tecnico = this.personal.find(p => p.id === item.personalId);
+    item.nombre = tecnico ? `${tecnico.nombre} ${tecnico.apellidos}` : '';
+    item.tarifaHora = tecnico?.tarifaHora ?? 0;
   }
 
   eventosByDate(isoDate: string): Evento[] {
@@ -223,9 +486,30 @@ export class EventosComponent {
       .sort((a, b) => (a.titulo ?? '').localeCompare(b.titulo ?? ''));
   }
 
+  get modalTitle(): string {
+    return this.isEditing ? 'Editar evento' : 'Nuevo evento';
+  }
+
   get monthLabel(): string {
     const m = this.currentMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
     return m.charAt(0).toUpperCase() + m.slice(1);
+  }
+
+  get presupuestoCalculado(): number {
+    const materialesCoste = (this.newEvent.materiales ?? []).reduce((acc, item) => {
+      if (!item.materialId || !item.cantidad) return acc;
+      const mat = this.materiales.find(m => m.id === item.materialId);
+      const tarifa = mat?.tarifaDia ?? 0;
+      return acc + item.cantidad * tarifa * this.multiplier();
+    }, 0);
+
+    const tecnicosCoste = (this.newEvent.tecnicosDetalle ?? []).reduce((acc, t) => {
+      const horas = t.horas ?? 0;
+      const tarifa = t.tarifaHora ?? 0;
+      return acc + horas * tarifa;
+    }, 0);
+
+    return materialesCoste + tecnicosCoste;
   }
 
   get calendarCells(): CalendarCell[] {
@@ -272,13 +556,15 @@ export class EventosComponent {
 
     return (this.eventos ?? [])
       .filter(e => {
+        if (!e.fecha) return false;
         const d = this.fromIsoDate(e.fecha);
         return d >= start && d < end;
       })
       .sort((a, b) => (a.fecha ?? '').localeCompare(b.fecha ?? ''));
   }
 
-  formatShortDayMonth(isoDate: string): string {
+  formatShortDayMonth(isoDate?: string | null): string {
+    if (!isoDate) return '';
     const d = this.fromIsoDate(isoDate);
     const day = String(d.getDate()).padStart(2, '0');
     const mon = d.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
@@ -293,6 +579,7 @@ export class EventosComponent {
   }
 
   private fromIsoDate(iso: string): Date {
+    if (!iso) return new Date(NaN);
     const [y, m, d] = iso.split('-').map(Number);
     return new Date(y, (m ?? 1) - 1, d ?? 1);
   }
@@ -312,7 +599,103 @@ export class EventosComponent {
   }
 
   private mondayIndex(date: Date): number {
-    const js = date.getDay(); // 0..6 (Dom..Sáb)
+    const js = date.getDay(); // 0..6 (Dom..Sab)
     return (js + 6) % 7;
+  }
+
+  private emptyEvent(): Evento {
+    const fecha = this.toIsoDate(new Date());
+    return {
+      titulo: '',
+      ubicacion: '',
+      fecha,
+      tipo: 'Evento',
+      color: this.colorForTipo('Evento'),
+      descripcion: '',
+      presupuesto: undefined,
+      tecnicos: undefined,
+      materiales: [],
+      dias: 1,
+      jornadas: 1,
+      modoCalculo: 'Dias',
+      tecnicosDetalle: []
+    };
+  }
+
+  private cloneEvent(evento: Evento): Evento {
+    const tipo = evento.tipo ?? 'Evento';
+    return {
+      id: evento.id,
+      titulo: evento.titulo ?? '',
+      ubicacion: evento.ubicacion ?? '',
+      fecha: evento.fecha ?? this.toIsoDate(new Date()),
+      tipo,
+      color: evento.color ?? this.colorForTipo(tipo),
+      descripcion: evento.descripcion ?? '',
+      presupuesto: evento.presupuesto,
+      tecnicos: evento.tecnicos,
+      materiales: (evento.materiales ?? []).map(m => ({ ...m })),
+      dias: evento.dias ?? 1,
+      jornadas: evento.jornadas ?? 1,
+      modoCalculo: evento.modoCalculo ?? 'Dias',
+      tecnicosDetalle: (evento.tecnicosDetalle ?? []).map(t => ({ ...t }))
+    };
+  }
+
+  private colorForTipo(tipo: Evento['tipo']): Evento['color'] {
+    switch (tipo) {
+      case 'Montaje':
+        return 'orange';
+      case 'Ensayo':
+        return 'green';
+      case 'Otro':
+        return 'purple';
+      default:
+        return 'blue';
+    }
+  }
+
+  private multiplier(): number {
+    if (this.newEvent.modoCalculo === 'Jornadas') {
+      return this.newEvent.jornadas ?? 1;
+    }
+    return this.newEvent.dias ?? 1;
+  }
+
+  private validateNewEvent(evento: Evento): string[] {
+    const errors: string[] = [];
+    if (!evento.titulo?.trim()) errors.push('El t\u00edtulo es obligatorio.');
+    if (!evento.fecha) errors.push('La fecha es obligatoria.');
+    if (!evento.tipo) errors.push('El tipo es obligatorio.');
+    if (evento.presupuesto != null && evento.presupuesto < 0) errors.push('El presupuesto no puede ser negativo.');
+    if (evento.tecnicos != null && evento.tecnicos < 0) errors.push('El n\u00famero de t\u00e9cnicos no puede ser negativo.');
+    if ((evento.dias ?? 0) < 0) errors.push('Los dias no pueden ser negativos.');
+    if ((evento.jornadas ?? 0) < 0) errors.push('Las jornadas no pueden ser negativas.');
+
+    (evento.materiales ?? []).forEach((m, i) => {
+      if (!m.materialId) errors.push(`Material ${i + 1}: selecciona un material.`);
+      if (!m.cantidad || m.cantidad < 1) errors.push(`Material ${i + 1}: cantidad inv\u00e1lida.`);
+    });
+
+    (evento.tecnicosDetalle ?? []).forEach((t, i) => {
+      if (!t.personalId) errors.push(`Tecnico ${i + 1}: selecciona un tecnico.`);
+      if (!t.horas || t.horas <= 0) errors.push(`Tecnico ${i + 1}: horas invalidas.`);
+    });
+
+    return errors;
+  }
+
+  private loadMateriales(): void {
+    this.api.getMateriales().subscribe({
+      next: (data) => this.materiales = data ?? [],
+      error: (e) => console.error('Error cargando materiales:', e)
+    });
+  }
+
+  private loadPersonal(): void {
+    this.api.getPersonal().subscribe({
+      next: (data) => this.personal = data ?? [],
+      error: (e) => console.error('Error cargando personal:', e)
+    });
   }
 }

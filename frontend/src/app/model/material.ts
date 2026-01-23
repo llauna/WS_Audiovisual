@@ -4,6 +4,10 @@ export interface Material {
   categoria: string;
   stockTotal: number;
   stockDisponible: number;
+  stockReservado: number;
+  stockReparacion: number;
+  tarifaDia: number;
+  almacen: string;
   ubicacionAlmacen: string;
   estado: string;
 }

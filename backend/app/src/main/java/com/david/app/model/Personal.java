@@ -23,4 +23,5 @@ public class Personal {
     private String tipoContrato;
     private String empresa;
     private String estado;
+    private Double tarifaHora;
 }
