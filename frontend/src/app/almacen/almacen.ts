@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../services/api.service';
 import { Material } from '../model/material';
 import { Almacen } from '../model/almacen';
+import { Categoria } from '../model/categoria';
 
 @Component({
   selector: 'app-almacen',
@@ -21,12 +22,30 @@ import { Almacen } from '../model/almacen';
       </header>
 
       <section class="card">
-        <h3>Alta de almacenes</h3>
-        <div class="form-grid">
-          <input [(ngModel)]="nuevoAlmacen.nombre" placeholder="Nombre del almacen">
-          <input [(ngModel)]="nuevoAlmacen.ubicacion" placeholder="Ubicacion">
-          <input [(ngModel)]="nuevoAlmacen.descripcion" placeholder="Descripcion">
-          <button class="btn-primary" (click)="guardarAlmacen()">Agregar almacen</button>
+        <div class="section-header">
+          <div>
+            <h3>Alta de almacenes</h3>
+            <p class="muted">Crear nuevos almacenes y sus ubicaciones</p>
+          </div>
+          <button class="btn-primary" (click)="openAlmacenModal()">Abrir</button>
+        </div>
+
+        <div class="toolbar" *ngIf="almacenes.length">
+          <label>
+            Filas
+            <select [(ngModel)]="almacenPageSize" (ngModelChange)="onAlmacenPageSizeChange()">
+              <option [ngValue]="5">5</option>
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="20">20</option>
+              <option [ngValue]="50">50</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="pagination" *ngIf="almacenTotalPages > 1">
+          <button class="btn-link" (click)="prevAlmacenPage()" [disabled]="almacenPage === 1">Anterior</button>
+          <span>Pagina {{ almacenPage }} de {{ almacenTotalPages }}</span>
+          <button class="btn-link" (click)="nextAlmacenPage()" [disabled]="almacenPage === almacenTotalPages">Siguiente</button>
         </div>
 
         <table class="compact-table" *ngIf="almacenes.length">
@@ -39,7 +58,7 @@ import { Almacen } from '../model/almacen';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let a of almacenes">
+            <tr *ngFor="let a of almacenesPaginados">
               <td>{{ a.nombre }}</td>
               <td>{{ a.ubicacion }}</td>
               <td>{{ a.descripcion }}</td>
@@ -47,6 +66,7 @@ import { Almacen } from '../model/almacen';
             </tr>
           </tbody>
         </table>
+
       </section>
 
       <section class="card">
@@ -68,27 +88,49 @@ import { Almacen } from '../model/almacen';
               <option [ngValue]="50">50</option>
             </select>
           </label>
+          <button class="btn-secondary" (click)="openInventarioModal()">Inventario</button>
         </div>
         <div class="repair-note" *ngIf="repairCount > 0">
           Aviso: {{ repairCount }} elemento(s) en reparacion.
         </div>
 
         <div class="form-card">
-          <input [(ngModel)]="nuevoMaterial.nombre" placeholder="Nombre del equipo">
-          <select [(ngModel)]="nuevoMaterial.categoria">
-            <option value="Audio">Audio</option>
-            <option value="Video">Video</option>
-            <option value="Iluminacion">Iluminacion</option>
-          </select>
-          <select [(ngModel)]="nuevoMaterial.almacen">
-            <option *ngFor="let a of almacenes" [value]="a.nombre">{{ a.nombre }}</option>
-            <option *ngIf="!almacenes.length" value="Principal">Principal</option>
-          </select>
-          <input [(ngModel)]="nuevoMaterial.ubicacionAlmacen" placeholder="Ubicacion">
-          <input type="number" min="0" [(ngModel)]="nuevoMaterial.stockTotal" placeholder="Stock total">
-          <input type="number" min="0" [(ngModel)]="nuevoMaterial.stockReparacion" placeholder="En reparacion">
-          <input type="number" min="0" step="0.01" [(ngModel)]="nuevoMaterial.tarifaDia" placeholder="Tarifa dia">
-          <button class="btn-primary" (click)="agregarMaterial()">Agregar material</button>
+          <label>
+            Nombre
+            <input [(ngModel)]="nuevoMaterial.nombre" placeholder="Nombre del equipo">
+          </label>
+          <label>
+            Categoria
+            <select [(ngModel)]="nuevoMaterial.categoria">
+              <option *ngFor="let c of categoriasDisponibles" [value]="c.nombre">{{ c.nombre }}</option>
+            </select>
+          </label>
+          <label>
+            Almacen
+            <select [(ngModel)]="nuevoMaterial.almacen">
+              <option *ngFor="let a of almacenes" [value]="a.nombre">{{ a.nombre }}</option>
+              <option *ngIf="!almacenes.length" value="Principal">Principal</option>
+            </select>
+          </label>
+          <label>
+            Ubicacion
+            <input [(ngModel)]="nuevoMaterial.ubicacionAlmacen" placeholder="Ubicacion">
+          </label>
+          <label>
+            Total
+            <input type="number" min="0" [(ngModel)]="nuevoMaterial.stockTotal" placeholder="Stock total">
+          </label>
+          <label>
+            En reparacion
+            <input type="number" min="0" [(ngModel)]="nuevoMaterial.stockReparacion" placeholder="En reparacion">
+          </label>
+          <label>
+            Tarifa dia
+            <input type="number" min="0" step="0.01" [(ngModel)]="nuevoMaterial.tarifaDia" placeholder="Tarifa dia">
+          </label>
+          <div class="form-actions">
+            <button class="btn-primary" (click)="agregarMaterial()">Agregar material</button>
+          </div>
         </div>
 
         <table>
@@ -99,21 +141,33 @@ import { Almacen } from '../model/almacen';
               <th>Almacen</th>
               <th>Ubicacion</th>
               <th>Total</th>
-              <th>Reservado</th>
               <th>En reparacion</th>
-              <th>Disponible</th>
               <th>Tarifa dia</th>
+              <th>Reservado</th>
+              <th>Disponible</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let m of materialesPaginados">
               <td>{{ m.nombre }}</td>
-              <td>{{ m.categoria }}</td>
+              <td>
+                <select
+                  [(ngModel)]="m.categoria"
+                  (ngModelChange)="actualizarCategoriaMaterial(m)"
+                >
+                  <option *ngFor="let c of categoriasParaMaterial(m)" [value]="c">{{ c }}</option>
+                </select>
+              </td>
               <td>{{ m.almacen }}</td>
-              <td>{{ m.ubicacionAlmacen }}</td>
+              <td>
+                <input
+                  class="inline-input"
+                  [(ngModel)]="m.ubicacionAlmacen"
+                  (blur)="actualizarUbicacion(m)"
+                >
+              </td>
               <td>{{ m.stockTotal }}</td>
-              <td>{{ m.stockReservado }}</td>
               <td>
                 <input
                   class="inline-input"
@@ -123,8 +177,9 @@ import { Almacen } from '../model/almacen';
                   (change)="actualizarStockReparacion(m)"
                 >
               </td>
-              <td>{{ m.stockDisponible }}</td>
               <td>{{ m.tarifaDia }}</td>
+              <td>{{ m.stockReservado }}</td>
+              <td>{{ m.stockDisponible }}</td>
               <td><button class="btn-link" (click)="borrarMaterial(m.id)">Eliminar</button></td>
             </tr>
           </tbody>
@@ -136,6 +191,99 @@ import { Almacen } from '../model/almacen';
           <button class="btn-link" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
         </div>
       </section>
+
+      <div class="modal-backdrop" *ngIf="showAlmacenModal">
+        <div class="modal">
+          <header class="modal-header">
+            <h3>Alta de almacenes</h3>
+            <button class="icon-btn" (click)="closeAlmacenModal()">&times;</button>
+          </header>
+          <div class="modal-body">
+            <div class="form-grid">
+              <input [(ngModel)]="nuevoAlmacen.nombre" placeholder="Nombre del almacen">
+              <input [(ngModel)]="nuevoAlmacen.ubicacion" placeholder="Ubicacion">
+              <input [(ngModel)]="nuevoAlmacen.descripcion" placeholder="Descripcion">
+            </div>
+            <div class="form-actions">
+            <button class="btn-primary" (click)="guardarAlmacen()">Agregar almacen</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" *ngIf="showInventarioModal">
+        <div class="modal">
+          <header class="modal-header">
+            <h3>Inventario de materiales</h3>
+            <button class="icon-btn" (click)="closeInventarioModal()">&times;</button>
+          </header>
+          <div class="modal-body">
+            <div class="toolbar inventario-toolbar">
+              <button class="btn-primary" (click)="imprimirInventario()">Imprimir</button>
+              <button class="btn-secondary" (click)="marcarInventarioHoy()">Marcar hoy</button>
+              <label>
+                Filas
+                <select [(ngModel)]="inventarioPageSize" (ngModelChange)="onInventarioPageSizeChange()">
+                  <option [ngValue]="5">5</option>
+                  <option [ngValue]="10">10</option>
+                  <option [ngValue]="20">20</option>
+                  <option [ngValue]="50">50</option>
+                </select>
+              </label>
+            </div>
+            <div class="pagination" *ngIf="inventarioTotalPages > 1">
+              <button class="btn-link" (click)="prevInventarioPage()" [disabled]="inventarioPage === 1">Anterior</button>
+              <span>Pagina {{ inventarioPage }} de {{ inventarioTotalPages }}</span>
+              <button class="btn-link" (click)="nextInventarioPage()" [disabled]="inventarioPage === inventarioTotalPages">Siguiente</button>
+            </div>
+            <table class="compact-table">
+              <thead>
+                <tr>
+                  <th>Inventariado</th>
+                  <th>Fecha</th>
+                  <th>Nombre</th>
+                  <th>Categoria</th>
+                  <th>Almacen</th>
+                  <th>Ubicacion</th>
+                  <th>Total</th>
+                  <th>Reservado</th>
+                  <th>En reparacion</th>
+                  <th>Disponible</th>
+                  <th>Tarifa dia</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of inventarioPaginados">
+                  <td>
+                    <input
+                      type="checkbox"
+                      [ngModel]="inventarioDone(m)"
+                      (ngModelChange)="setInventarioDone(m, $event)"
+                    >
+                  </td>
+                  <td>
+                    <input
+                      class="inline-input"
+                      type="date"
+                      [ngModel]="inventarioDate(m)"
+                      (ngModelChange)="setInventarioDate(m, $event)"
+                    >
+                  </td>
+                  <td>{{ m.nombre }}</td>
+                  <td>{{ m.categoria }}</td>
+                  <td>{{ m.almacen }}</td>
+                  <td>{{ m.ubicacionAlmacen }}</td>
+                  <td>{{ m.stockTotal }}</td>
+                  <td>{{ m.stockReservado }}</td>
+                  <td>{{ m.stockReparacion }}</td>
+                  <td>{{ m.stockDisponible }}</td>
+                  <td>{{ m.tarifaDia }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -151,11 +299,14 @@ import { Almacen } from '../model/almacen';
 
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 1rem; }
     .form-card { margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .form-card label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; color: #344054; }
     .form-card input, .form-card select, .form-grid input { padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; }
+    .form-actions { margin-top: 12px; }
     .btn-primary { background: #2c3e50; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; }
     .btn-link { background: none; border: none; color: #2c3e50; cursor: pointer; }
     .btn-link[disabled] { opacity: 0.5; cursor: not-allowed; }
     .inline-input { width: 90px; padding: 0.35rem 0.5rem; border: 1px solid #ddd; border-radius: 6px; }
+    .toolbar .btn-secondary { height: 36px; }
 
     .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 1rem; }
     .repair-note { margin: 0 0 1rem; padding: 0.6rem 0.8rem; background: #fff6e6; border: 1px solid #f0c36d; border-radius: 8px; color: #7a4d00; font-weight: 600; }
@@ -166,14 +317,59 @@ import { Almacen } from '../model/almacen';
     .compact-table th, .compact-table td { padding: 8px; }
 
     .btn-secondary { background: #eef2f6; color: #344054; border: none; padding: 0.6rem 1rem; border-radius: 10px; cursor: pointer; text-decoration: none; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: #fff;
+      width: min(1200px, 98vw);
+      max-height: 90vh;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-body { padding: 1.5rem; overflow: auto; max-height: calc(90vh - 70px); }
+    .icon-btn {
+      border: none;
+      background: #f1f3f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .inventario-toolbar { flex-wrap: nowrap; align-items: center; }
+    .inventario-toolbar label { margin-left: auto; }
   `]
 })
 export class AlmacenComponent implements OnInit {
   materiales: Material[] = [];
   almacenes: Almacen[] = [];
+  categorias: Categoria[] = [];
   almacenFiltro = '';
   currentPage = 1;
   pageSize = 10;
+  showAlmacenModal = false;
+  almacenPage = 1;
+  almacenPageSize = 5;
+  showInventarioModal = false;
+  inventarioEstado: Record<string, { done: boolean; date: string }> = {};
+  inventarioPage = 1;
+  inventarioPageSize = 10;
 
   nuevoMaterial: Material = this.emptyMaterial();
   nuevoAlmacen: Almacen = { nombre: '', ubicacion: '', descripcion: '' };
@@ -183,6 +379,7 @@ export class AlmacenComponent implements OnInit {
   ngOnInit() {
     this.cargarAlmacenes();
     this.cargarMateriales();
+    this.cargarCategorias();
   }
 
   get materialesFiltrados(): Material[] {
@@ -194,6 +391,10 @@ export class AlmacenComponent implements OnInit {
     return Math.max(1, Math.ceil(this.materialesFiltrados.length / this.pageSize));
   }
 
+  get almacenTotalPages(): number {
+    return Math.max(1, Math.ceil(this.almacenes.length / this.almacenPageSize));
+  }
+
   get repairCount(): number {
     return this.materialesFiltrados.reduce((acc, m) => acc + (m.stockReparacion ?? 0), 0);
   }
@@ -201,6 +402,20 @@ export class AlmacenComponent implements OnInit {
   get materialesPaginados(): Material[] {
     const start = (this.currentPage - 1) * this.pageSize;
     return this.materialesFiltrados.slice(start, start + this.pageSize);
+  }
+
+  get inventarioTotalPages(): number {
+    return Math.max(1, Math.ceil(this.materialesFiltrados.length / this.inventarioPageSize));
+  }
+
+  get inventarioPaginados(): Material[] {
+    const start = (this.inventarioPage - 1) * this.inventarioPageSize;
+    return this.materialesFiltrados.slice(start, start + this.inventarioPageSize);
+  }
+
+  get almacenesPaginados(): Almacen[] {
+    const start = (this.almacenPage - 1) * this.almacenPageSize;
+    return this.almacenes.slice(start, start + this.almacenPageSize);
   }
 
   onFilterChange() {
@@ -211,6 +426,14 @@ export class AlmacenComponent implements OnInit {
     this.currentPage = 1;
   }
 
+  onInventarioPageSizeChange() {
+    this.inventarioPage = 1;
+  }
+
+  onAlmacenPageSizeChange() {
+    this.almacenPage = 1;
+  }
+
   prevPage() {
     this.currentPage = Math.max(1, this.currentPage - 1);
   }
@@ -219,9 +442,26 @@ export class AlmacenComponent implements OnInit {
     this.currentPage = Math.min(this.totalPages, this.currentPage + 1);
   }
 
+  prevInventarioPage() {
+    this.inventarioPage = Math.max(1, this.inventarioPage - 1);
+  }
+
+  nextInventarioPage() {
+    this.inventarioPage = Math.min(this.inventarioTotalPages, this.inventarioPage + 1);
+  }
+
+  prevAlmacenPage() {
+    this.almacenPage = Math.max(1, this.almacenPage - 1);
+  }
+
+  nextAlmacenPage() {
+    this.almacenPage = Math.min(this.almacenTotalPages, this.almacenPage + 1);
+  }
+
   cargarAlmacenes() {
     this.apiService.getAlmacenes().subscribe(data => {
       this.almacenes = data ?? [];
+      this.almacenPage = Math.min(this.almacenPage, this.almacenTotalPages);
       if (!this.nuevoMaterial.almacen && this.almacenes.length) {
         this.nuevoMaterial.almacen = this.almacenes[0].nombre;
       }
@@ -235,6 +475,79 @@ export class AlmacenComponent implements OnInit {
     this.apiService.getMateriales().subscribe(data => {
       this.materiales = (data ?? []).map(m => this.normalizeMaterial(m));
     });
+  }
+
+  cargarCategorias() {
+    this.apiService.getCategorias().subscribe(data => {
+      this.categorias = data ?? [];
+      if (!this.nuevoMaterial.categoria) {
+        this.nuevoMaterial.categoria = this.categorias[0]?.nombre ?? '';
+      }
+    });
+  }
+
+  openAlmacenModal() {
+    this.showAlmacenModal = true;
+  }
+
+  closeAlmacenModal() {
+    this.showAlmacenModal = false;
+  }
+
+  openInventarioModal() {
+    this.inventarioPage = 1;
+    this.showInventarioModal = true;
+  }
+
+  closeInventarioModal() {
+    this.showInventarioModal = false;
+  }
+
+  marcarInventarioHoy() {
+    const today = new Date().toISOString().slice(0, 10);
+    this.materialesFiltrados.forEach(m => {
+      const key = m.id || m.nombre;
+      if (!key) return;
+      this.inventarioEstado[key] = { done: true, date: today };
+    });
+  }
+
+  inventarioKey(material: Material): string {
+    return material.id || material.nombre || '';
+  }
+
+  inventarioDone(material: Material): boolean {
+    const key = this.inventarioKey(material);
+    return key ? this.inventarioEstado[key]?.done ?? false : false;
+  }
+
+  setInventarioDone(material: Material, value: boolean) {
+    const key = this.inventarioKey(material);
+    if (!key) return;
+    this.inventarioEstado[key] = {
+      done: value,
+      date: this.inventarioEstado[key]?.date ?? ''
+    };
+  }
+
+  inventarioDate(material: Material): string {
+    const key = this.inventarioKey(material);
+    return key ? this.inventarioEstado[key]?.date ?? '' : '';
+  }
+
+  setInventarioDate(material: Material, value: string) {
+    const key = this.inventarioKey(material);
+    if (!key) return;
+    this.inventarioEstado[key] = {
+      done: this.inventarioEstado[key]?.done ?? false,
+      date: value ?? ''
+    };
+  }
+
+  imprimirInventario() {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
   }
 
   guardarAlmacen() {
@@ -290,10 +603,26 @@ export class AlmacenComponent implements OnInit {
     });
   }
 
+  actualizarUbicacion(material: Material) {
+    if (!material.id) return;
+    this.apiService.updateMaterial(material.id, material).subscribe({
+      next: () => this.cargarMateriales(),
+      error: (err) => alert(err?.error?.message || 'No se pudo actualizar la ubicacion')
+    });
+  }
+
+  actualizarCategoriaMaterial(material: Material) {
+    if (!material.id) return;
+    this.apiService.updateMaterial(material.id, material).subscribe({
+      next: () => this.cargarMateriales(),
+      error: (err) => alert(err?.error?.message || 'No se pudo actualizar la categoria')
+    });
+  }
+
   private emptyMaterial(): Material {
     return {
       nombre: '',
-      categoria: 'Audio',
+      categoria: '',
       stockTotal: 0,
       stockDisponible: 0,
       stockReservado: 0,
@@ -323,5 +652,18 @@ export class AlmacenComponent implements OnInit {
       ubicacionAlmacen: material.ubicacionAlmacen ?? '',
       estado: material.estado ?? 'Operativo'
     };
+  }
+
+  get categoriasDisponibles(): { nombre: string }[] {
+    return this.categorias;
+  }
+
+  categoriasParaMaterial(material: Material): string[] {
+    const base = this.categoriasDisponibles.map(c => c.nombre);
+    const actual = (material.categoria ?? '').trim();
+    if (actual && !base.includes(actual)) {
+      return [actual, ...base];
+    }
+    return base;
   }
 }

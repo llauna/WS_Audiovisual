@@ -114,7 +114,7 @@ interface CalendarCell {
 
             <label>
               Fecha *
-              <input type="date" [(ngModel)]="newEvent.fecha" />
+              <input class="input-compact" type="date" [(ngModel)]="newEvent.fecha" />
             </label>
 
             <label>
@@ -122,47 +122,51 @@ interface CalendarCell {
               <input type="text" [(ngModel)]="newEvent.ubicacion" />
             </label>
 
-            <label>
-              Tipo *
-              <select [(ngModel)]="newEvent.tipo" (ngModelChange)="syncColorWithTipo()">
-                <option value="Evento">Evento</option>
-                <option value="Montaje">Montaje</option>
-                <option value="Ensayo">Ensayo</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </label>
+            <div class="inline-pair span-2">
+              <label class="field-compact">
+                Tipo *
+                <select class="select-compact" [(ngModel)]="newEvent.tipo" (ngModelChange)="syncColorWithTipo()">
+                  <option value="Evento">Evento</option>
+                  <option value="Montaje">Montaje</option>
+                  <option value="Ensayo">Ensayo</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </label>
 
-            <label>
-              Modo calculo
-              <select [(ngModel)]="newEvent.modoCalculo">
-                <option value="Dias">Dias</option>
-                <option value="Jornadas">Jornadas</option>
-              </select>
-            </label>
+              <label class="field-compact">
+                Modo calculo
+                <select class="select-compact" [(ngModel)]="newEvent.modoCalculo">
+                  <option value="Dias">Dias</option>
+                  <option value="Jornadas">Jornadas</option>
+                </select>
+              </label>
+            </div>
 
-            <label>
-              Dias
-              <input type="number" min="0" step="1" [(ngModel)]="newEvent.dias" />
-            </label>
+            <div class="inline-pair span-2">
+              <label class="field-compact">
+                Dias
+                <input class="input-compact input-narrow" type="number" min="0" step="1" [(ngModel)]="newEvent.dias" />
+              </label>
 
-            <label>
-              Jornadas
-              <input type="number" min="0" step="1" [(ngModel)]="newEvent.jornadas" />
-            </label>
+              <label class="field-compact">
+                Jornadas
+                <input class="input-compact input-narrow" type="number" min="0" step="1" [(ngModel)]="newEvent.jornadas" />
+              </label>
+            </div>
 
             <label class="span-2">
               Descripci&oacute;n
               <textarea rows="3" [(ngModel)]="newEvent.descripcion"></textarea>
             </label>
 
-            <label>
+            <label class="field-compact">
               Presupuesto (&euro;)
-              <input type="number" min="0" step="0.01" [(ngModel)]="newEvent.presupuesto" />
+              <input class="input-compact" type="number" min="0" step="0.01" [(ngModel)]="newEvent.presupuesto" />
             </label>
 
-            <label>
+            <label class="field-compact">
               N&ordm; t&eacute;cnicos
-              <input type="number" min="0" step="1" [(ngModel)]="newEvent.tecnicos" />
+              <input class="input-compact" type="number" min="0" step="1" [(ngModel)]="newEvent.tecnicos" />
             </label>
           </div>
 
@@ -344,7 +348,7 @@ interface CalendarCell {
     .icon-btn.danger { background: #ffe5e5; color: #b00020; }
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -354,6 +358,36 @@ interface CalendarCell {
       border-radius: 8px;
       padding: 0.6rem 0.75rem;
       font-weight: 500;
+    }
+    .form-grid input,
+    .form-grid select {
+      height: 36px;
+      line-height: 1.2;
+      box-sizing: border-box;
+    }
+    .form-grid .input-compact,
+    .form-grid .select-compact {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.85rem;
+      height: 36px;
+      line-height: 1.2;
+      box-sizing: border-box;
+    }
+    .form-grid .field-compact {
+      align-items: flex-start;
+    }
+    .form-grid .field-compact .input-compact,
+    .form-grid .field-compact .select-compact {
+      width: 150px;
+    }
+    .form-grid .input-narrow {
+      width: 120px;
+    }
+    .form-grid .inline-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: end;
     }
     .span-2 { grid-column: span 2; }
     .materials { margin-top: 0.5rem; }

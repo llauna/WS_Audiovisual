@@ -6,6 +6,10 @@ import { Personal } from '../model/personal';
 import { Evento } from '../model/evento';
 import { Almacen } from '../model/almacen';
 import { RegistroHoras } from '../model/registro-horas';
+import { Categoria } from '../model/categoria';
+import { Proveedor } from '../model/proveedor';
+import { Reparacion } from '../model/reparacion';
+import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
 
 @Injectable({
   providedIn: 'root'
@@ -94,5 +98,73 @@ export class ApiService {
 
   deleteEvento(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/eventos/${id}`);
+  }
+
+  // --- METODOS DE CATEGORIAS ---
+  getCategorias(): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${this.apiUrl}/categorias`);
+  }
+
+  saveCategoria(categoria: Categoria): Observable<Categoria> {
+    return this.http.post<Categoria>(`${this.apiUrl}/categorias`, categoria);
+  }
+
+  updateCategoria(id: string, categoria: Categoria): Observable<Categoria> {
+    return this.http.put<Categoria>(`${this.apiUrl}/categorias/${id}`, categoria);
+  }
+
+  deleteCategoria(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/categorias/${id}`);
+  }
+
+  // --- METODOS DE PROVEEDORES ---
+  getProveedores(): Observable<Proveedor[]> {
+    return this.http.get<Proveedor[]>(`${this.apiUrl}/proveedores`);
+  }
+
+  saveProveedor(proveedor: Proveedor): Observable<Proveedor> {
+    return this.http.post<Proveedor>(`${this.apiUrl}/proveedores`, proveedor);
+  }
+
+  updateProveedor(id: string, proveedor: Proveedor): Observable<Proveedor> {
+    return this.http.put<Proveedor>(`${this.apiUrl}/proveedores/${id}`, proveedor);
+  }
+
+  deleteProveedor(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/proveedores/${id}`);
+  }
+
+  // --- METODOS DE REPARACIONES ---
+  getReparaciones(): Observable<Reparacion[]> {
+    return this.http.get<Reparacion[]>(`${this.apiUrl}/reparaciones`);
+  }
+
+  saveReparacion(reparacion: Reparacion): Observable<Reparacion> {
+    return this.http.post<Reparacion>(`${this.apiUrl}/reparaciones`, reparacion);
+  }
+
+  updateReparacion(id: string, reparacion: Reparacion): Observable<Reparacion> {
+    return this.http.put<Reparacion>(`${this.apiUrl}/reparaciones/${id}`, reparacion);
+  }
+
+  deleteReparacion(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/reparaciones/${id}`);
+  }
+
+  // --- METODOS DE SOLICITUDES DE PRESUPUESTO ---
+  getSolicitudesPresupuesto(): Observable<SolicitudPresupuesto[]> {
+    return this.http.get<SolicitudPresupuesto[]>(`${this.apiUrl}/solicitudes-presupuesto`);
+  }
+
+  saveSolicitudPresupuesto(solicitud: SolicitudPresupuesto): Observable<SolicitudPresupuesto> {
+    return this.http.post<SolicitudPresupuesto>(`${this.apiUrl}/solicitudes-presupuesto`, solicitud);
+  }
+
+  updateSolicitudPresupuesto(id: string, solicitud: SolicitudPresupuesto): Observable<SolicitudPresupuesto> {
+    return this.http.put<SolicitudPresupuesto>(`${this.apiUrl}/solicitudes-presupuesto/${id}`, solicitud);
+  }
+
+  deleteSolicitudPresupuesto(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/solicitudes-presupuesto/${id}`);
   }
 }
