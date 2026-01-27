@@ -5,6 +5,7 @@ import { AlmacenComponent } from './almacen/almacen';
 export const routes: Routes = [
   { path: '', component: Dashboard },
   { path: 'almacen', component: AlmacenComponent },
+  { path: 'login', loadComponent: () => import('./login/login').then(m => m.LoginComponent) },
   {
     path: 'eventos',
     loadComponent: () => import('./eventos/eventos').then(m => m.EventosComponent)

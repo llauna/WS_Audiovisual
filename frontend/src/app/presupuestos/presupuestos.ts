@@ -6,6 +6,8 @@ import { ApiService } from '../services/api.service';
 import { Proveedor } from '../model/proveedor';
 import { Material } from '../model/material';
 import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
+import { Evento } from '../model/evento';
+import { Cliente } from '../model/cliente';
 
 @Component({
   selector: 'app-presupuestos',
@@ -21,46 +23,25 @@ import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
         <a class="btn-secondary" routerLink="/">Inicio</a>
       </header>
 
+      <div class="cards-grid">
       <div class="card">
         <header class="section-header compact">
           <div>
             <h3>Solicitud a proveedor</h3>
             <p class="muted">Peticion de material para presupuestos</p>
           </div>
+          <button class="btn-success" (click)="openSolicitudProveedorModal()">Abrir</button>
         </header>
-        <div class="form-grid">
-          <label class="field-span-6">
-            Proveedor
-            <select [(ngModel)]="nuevaSolicitud.proveedorId">
-              <option value="">Selecciona proveedor</option>
-              <option *ngFor="let p of proveedoresMaterial" [value]="p.id">{{ p.nombre }}</option>
-            </select>
-          </label>
-          <label class="field-span-6">
-            Material
-            <select [(ngModel)]="nuevaSolicitud.materialId">
-              <option value="">Selecciona material</option>
-              <option *ngFor="let m of materiales" [value]="m.id">{{ m.nombre }}</option>
-            </select>
-          </label>
-          <label class="field-span-2">
-            Precio
-            <input type="number" min="0" step="0.01" [(ngModel)]="nuevaSolicitud.precio">
-          </label>
-          <div class="field-spacer" aria-hidden="true"></div>
-          <label class="field-span-3">
-            Fecha recogida
-            <input type="date" [(ngModel)]="nuevaSolicitud.fechaRecogida">
-          </label>
-          <div class="field-spacer" aria-hidden="true"></div>
-          <label class="field-span-3">
-            Fecha devolucion
-            <input type="date" [(ngModel)]="nuevaSolicitud.fechaDevolucion">
-          </label>
-          <input class="field-span-8" [(ngModel)]="nuevaSolicitud.notas" placeholder="Notas">
-          <div class="field-spacer" aria-hidden="true"></div>
-          <button class="btn-primary field-span-3" (click)="guardarSolicitud()">Solicitar presupuesto</button>
-        </div>
+      </div>
+
+      <div class="card">
+        <header class="section-header compact">
+          <div>
+            <h3>Presupuesto a cliente</h3>
+            <p class="muted">Importe presentado ligado al evento</p>
+          </div>
+          <button class="btn-success" (click)="openPresupuestoClienteModal()">Abrir</button>
+        </header>
       </div>
 
       <div class="card">
@@ -69,29 +50,240 @@ import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
             <h3>Solicitudes recientes</h3>
             <p class="muted">Historial de solicitudes enviadas</p>
           </div>
+          <button class="btn-success" (click)="openSolicitudesRecientesModal()">Abrir</button>
         </header>
-        <table class="modern-table" *ngIf="solicitudes.length">
-          <thead>
-            <tr>
-              <th>Proveedor</th>
-              <th>Material</th>
-              <th>Precio</th>
-              <th>Recogida</th>
-              <th>Devolucion</th>
-              <th>Notas</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let s of solicitudes">
-              <td>{{ nombreProveedor(s.proveedorId) }}</td>
-              <td>{{ nombreMaterial(s.materialId) }}</td>
-              <td>{{ s.precio }}</td>
-              <td>{{ s.fechaRecogida }}</td>
-              <td>{{ s.fechaDevolucion }}</td>
-              <td>{{ s.notas }}</td>
-            </tr>
-          </tbody>
-        </table>
+      </div>
+
+      <div class="card">
+        <header class="section-header compact">
+          <div>
+            <h3>Eventos con presupuesto presentado</h3>
+            <p class="muted">Solo eventos con importe presentado</p>
+          </div>
+          <button class="btn-success" (click)="openEventosAceptadosModal()">Abrir</button>
+        </header>
+      </div>
+
+      <div class="card">
+        <header class="section-header compact">
+          <div>
+            <h3>Eventos pendientes o sin presupuesto</h3>
+            <p class="muted">No se deben realizar hasta ser aceptados</p>
+          </div>
+          <button class="btn-success" (click)="openEventosPendientesModal()">Abrir</button>
+        </header>
+      </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showSolicitudProveedorModal">
+      <div class="modal">
+        <header class="modal-header">
+          <h3>Solicitud a proveedor</h3>
+          <button class="icon-btn" (click)="closeSolicitudProveedorModal()">&times;</button>
+        </header>
+        <div class="modal-body">
+          <div class="form-grid">
+            <label class="field-span-6">
+              Proveedor
+              <select [(ngModel)]="nuevaSolicitud.proveedorId">
+                <option value="">Selecciona proveedor</option>
+                <option *ngFor="let p of proveedoresMaterial" [value]="p.id">{{ p.nombre }}</option>
+              </select>
+            </label>
+            <label class="field-span-6">
+              Material
+              <select [(ngModel)]="nuevaSolicitud.materialId">
+                <option value="">Selecciona material</option>
+                <option *ngFor="let m of materiales" [value]="m.id">{{ m.nombre }}</option>
+              </select>
+            </label>
+            <label class="field-span-2">
+              Precio
+              <input type="number" min="0" step="0.01" [(ngModel)]="nuevaSolicitud.precio">
+            </label>
+            <div class="field-spacer" aria-hidden="true"></div>
+            <label class="field-span-3">
+              Fecha recogida
+              <input type="date" [(ngModel)]="nuevaSolicitud.fechaRecogida">
+            </label>
+            <div class="field-spacer" aria-hidden="true"></div>
+            <label class="field-span-3">
+              Fecha devolucion
+              <input type="date" [(ngModel)]="nuevaSolicitud.fechaDevolucion">
+            </label>
+            <input class="field-span-8" [(ngModel)]="nuevaSolicitud.notas" placeholder="Notas">
+            <div class="field-spacer" aria-hidden="true"></div>
+            <button class="btn-primary field-span-3" (click)="guardarSolicitud()">Solicitar presupuesto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showPresupuestoClienteModal">
+      <div class="modal">
+        <header class="modal-header">
+          <h3>Presupuesto a cliente</h3>
+          <button class="icon-btn" (click)="closePresupuestoClienteModal()">&times;</button>
+        </header>
+        <div class="modal-body">
+          <div class="form-grid">
+            <label class="field-span-6">
+              Evento
+              <select [(ngModel)]="eventoSeleccionadoId" (ngModelChange)="onEventoChange()">
+                <option value="">Selecciona evento</option>
+                <option *ngFor="let e of eventos" [value]="e.id">{{ e.titulo }} - {{ e.fecha }}</option>
+              </select>
+            </label>
+            <label class="field-span-6">
+              Cliente
+              <input [value]="clienteEventoSeleccionado" placeholder="Cliente" disabled>
+            </label>
+            <label class="field-span-2">
+              Presupuesto calculado
+              <input [value]="presupuestoCalculadoEvento | number:'1.2-2'" disabled>
+            </label>
+            <div class="field-spacer" aria-hidden="true"></div>
+            <label class="field-span-2">
+              Importe presentado
+              <input type="number" min="0" step="0.01" [(ngModel)]="importePresentado">
+            </label>
+            <div class="field-spacer" aria-hidden="true"></div>
+            <label class="field-span-2">
+              Estado
+              <select [(ngModel)]="estadoPresupuesto">
+                <option value="Pendiente">Pendiente</option>
+                <option value="Aceptado">Aceptado</option>
+                <option value="Rechazado">Rechazado</option>
+              </select>
+            </label>
+            <div class="field-spacer" aria-hidden="true"></div>
+            <label class="field-span-3">
+              Fecha evento
+              <input [value]="fechaEventoSeleccionado" disabled>
+            </label>
+            <div class="field-spacer" aria-hidden="true"></div>
+            <button class="btn-primary field-span-3" (click)="guardarPresupuestoEvento()">Presentar presupuesto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showSolicitudesRecientesModal">
+      <div class="modal">
+        <header class="modal-header">
+          <h3>Solicitudes recientes</h3>
+          <button class="icon-btn" (click)="closeSolicitudesRecientesModal()">&times;</button>
+        </header>
+        <div class="modal-body">
+          <table class="modern-table" *ngIf="solicitudes.length; else noSolicitudesModal">
+            <thead>
+              <tr>
+                <th>Proveedor</th>
+                <th>Material</th>
+                <th>Precio</th>
+                <th>Recogida</th>
+                <th>Devolucion</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of solicitudes">
+                <td>{{ nombreProveedor(s.proveedorId) }}</td>
+                <td>{{ nombreMaterial(s.materialId) }}</td>
+                <td>{{ s.precio }}</td>
+                <td>{{ s.fechaRecogida }}</td>
+                <td>{{ s.fechaDevolucion }}</td>
+                <td>{{ s.notas }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noSolicitudesModal>
+            <p class="muted">No hay solicitudes recientes.</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showEventosAceptadosModal">
+      <div class="modal">
+        <header class="modal-header">
+          <h3>Eventos con presupuesto presentado</h3>
+          <button class="icon-btn" (click)="closeEventosAceptadosModal()">&times;</button>
+        </header>
+        <div class="modal-body">
+          <table class="modern-table" *ngIf="eventosAceptados.length; else noPresupuestosModal">
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Presupuesto presentado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of eventosAceptados">
+                <td>{{ e.titulo }}</td>
+                <td>{{ e.fecha }}</td>
+                <td>{{ nombreCliente(e.clienteId) }}</td>
+                <td>{{ e.presupuestoPresentado | number:'1.2-2' }}</td>
+                <td>
+                  <span class="status-pill"
+                    [class.accepted]="e.presupuestoEstado === 'Aceptado'"
+                    [class.pending]="!e.presupuestoEstado || e.presupuestoEstado === 'Pendiente'"
+                    [class.rejected]="e.presupuestoEstado === 'Rechazado'">
+                    {{ e.presupuestoEstado || 'Pendiente' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noPresupuestosModal>
+            <p class="muted">No hay eventos aceptados.</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="showEventosPendientesModal">
+      <div class="modal">
+        <header class="modal-header">
+          <h3>Eventos pendientes o sin presupuesto</h3>
+          <button class="icon-btn" (click)="closeEventosPendientesModal()">&times;</button>
+        </header>
+        <div class="modal-body">
+          <table class="modern-table" *ngIf="eventosPendientes.length; else noPendientesModal">
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Presupuesto presentado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of eventosPendientes">
+                <td>{{ e.titulo }}</td>
+                <td>{{ e.fecha }}</td>
+                <td>{{ nombreCliente(e.clienteId) }}</td>
+                <td>{{ e.presupuestoPresentado | number:'1.2-2' }}</td>
+                <td>
+                  <span class="status-pill"
+                    [class.accepted]="e.presupuestoEstado === 'Aceptado'"
+                    [class.pending]="!e.presupuestoEstado || e.presupuestoEstado === 'Pendiente'"
+                    [class.rejected]="e.presupuestoEstado === 'Rechazado'">
+                    {{ e.presupuestoEstado || 'Pendiente' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noPendientesModal>
+            <p class="muted">No hay eventos pendientes o sin presupuesto.</p>
+          </ng-template>
+        </div>
       </div>
     </div>
   `,
@@ -100,20 +292,25 @@ import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
     .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
     .section-header.compact { margin-bottom: 1rem; }
     .muted { color: #7a7a7a; margin: 0.25rem 0 0; }
+    .cards-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
     .card { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     .btn-secondary { background: #eef2f6; color: #344054; border: none; padding: 0.6rem 1rem; border-radius: 10px; cursor: pointer; text-decoration: none; }
     .btn-primary { background: #2c3e50; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; }
+    .btn-success { background: #27ae60; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; }
+    .btn-success:hover { background: #219150; }
     .form-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 14px; row-gap: 10px; margin-bottom: 1rem; }
     .form-grid label { display: flex; flex-direction: column; gap: 6px; }
     .field-span-6 { grid-column: span 6; }
     .field-span-3 { grid-column: span 3; }
     .field-span-2 { grid-column: span 2; }
+    .field-span-4 { grid-column: span 4; }
     .field-span-8 { grid-column: span 8; }
     .field-spacer { grid-column: span 1; }
     @media (max-width: 720px) {
       .form-grid { grid-template-columns: 1fr; }
       .field-span-6,
       .field-span-3,
+      .field-span-4,
       .field-span-8,
       .field-spacer { grid-column: span 1; }
       .field-spacer { display: none; }
@@ -121,14 +318,77 @@ import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
     .modern-table { width: 100%; border-collapse: collapse; }
     .modern-table th { text-align: left; padding: 0.75rem; background: #f8f9fa; color: #666; font-weight: 600; }
     .modern-table td { padding: 0.75rem; border-bottom: 1px solid #eee; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .status-pill.accepted { background: #e8f8ee; color: #1e7e34; }
+    .status-pill.pending { background: #fff4e5; color: #a16207; }
+    .status-pill.rejected { background: #ffe9e9; color: #b42318; }
     input, select { padding: 0.5rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: #fff;
+      width: min(1100px, 95vw);
+      max-height: 90vh;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+    .modal-body {
+      padding: 1.5rem;
+      overflow: auto;
+      max-height: calc(90vh - 70px);
+    }
+    .icon-btn {
+      border: none;
+      background: #f1f3f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
   `]
 })
 export class PresupuestosComponent implements OnInit {
   proveedores: Proveedor[] = [];
   materiales: Material[] = [];
   solicitudes: SolicitudPresupuesto[] = [];
+  eventos: Evento[] = [];
+  clientes: Cliente[] = [];
   nuevaSolicitud: SolicitudPresupuesto = this.resetSolicitud();
+  eventoSeleccionadoId = '';
+  importePresentado = 0;
+  estadoPresupuesto: 'Pendiente' | 'Aceptado' | 'Rechazado' = 'Pendiente';
+  showSolicitudProveedorModal = false;
+  showPresupuestoClienteModal = false;
+  showSolicitudesRecientesModal = false;
+  showEventosAceptadosModal = false;
+  showEventosPendientesModal = false;
 
   constructor(private apiService: ApiService) {}
 
@@ -136,6 +396,48 @@ export class PresupuestosComponent implements OnInit {
     this.cargarProveedores();
     this.cargarMateriales();
     this.cargarSolicitudes();
+    this.cargarEventos();
+    this.cargarClientes();
+  }
+
+  openSolicitudProveedorModal() {
+    this.showSolicitudProveedorModal = true;
+  }
+
+  closeSolicitudProveedorModal() {
+    this.showSolicitudProveedorModal = false;
+  }
+
+  openPresupuestoClienteModal() {
+    this.showPresupuestoClienteModal = true;
+  }
+
+  closePresupuestoClienteModal() {
+    this.showPresupuestoClienteModal = false;
+  }
+
+  openSolicitudesRecientesModal() {
+    this.showSolicitudesRecientesModal = true;
+  }
+
+  closeSolicitudesRecientesModal() {
+    this.showSolicitudesRecientesModal = false;
+  }
+
+  openEventosAceptadosModal() {
+    this.showEventosAceptadosModal = true;
+  }
+
+  closeEventosAceptadosModal() {
+    this.showEventosAceptadosModal = false;
+  }
+
+  openEventosPendientesModal() {
+    this.showEventosPendientesModal = true;
+  }
+
+  closeEventosPendientesModal() {
+    this.showEventosPendientesModal = false;
   }
 
   get proveedoresMaterial(): Proveedor[] {
@@ -153,6 +455,41 @@ export class PresupuestosComponent implements OnInit {
         this.cargarSolicitudes();
       },
       error: (err) => alert(err?.error?.message || 'No se pudo guardar la solicitud')
+    });
+  }
+
+  onEventoChange() {
+    const evento = this.eventoSeleccionado;
+    if (!evento) {
+      this.importePresentado = 0;
+      this.estadoPresupuesto = 'Pendiente';
+      return;
+    }
+    const base = this.presupuestoCalculadoEvento;
+    this.importePresentado = evento.presupuestoPresentado ?? base;
+    this.estadoPresupuesto = evento.presupuestoEstado ?? 'Pendiente';
+  }
+
+  guardarPresupuestoEvento() {
+    const evento = this.eventoSeleccionado;
+    if (!evento?.id) {
+      alert('Selecciona un evento');
+      return;
+    }
+    if (!this.importePresentado || this.importePresentado <= 0) {
+      alert('El importe presentado debe ser mayor que 0');
+      return;
+    }
+    const payload: Evento = {
+      ...evento,
+      presupuestoPresentado: this.importePresentado,
+      presupuestoEstado: this.estadoPresupuesto
+    };
+    this.apiService.updateEvento(evento.id, payload).subscribe({
+      next: () => {
+        this.cargarEventos();
+      },
+      error: (err) => alert(err?.error?.message || 'No se pudo guardar el presupuesto')
     });
   }
 
@@ -175,6 +512,74 @@ export class PresupuestosComponent implements OnInit {
       next: (data) => this.solicitudes = data ?? [],
       error: (err) => console.error('Error cargando solicitudes:', err)
     });
+  }
+
+  private cargarEventos() {
+    this.apiService.getEventos().subscribe({
+      next: (data) => this.eventos = data ?? [],
+      error: (err) => console.error('Error cargando eventos:', err)
+    });
+  }
+
+  private cargarClientes() {
+    this.apiService.getClientes().subscribe({
+      next: (data) => this.clientes = data ?? [],
+      error: (err) => console.error('Error cargando clientes:', err)
+    });
+  }
+
+  get eventoSeleccionado(): Evento | undefined {
+    return this.eventos.find(e => e.id === this.eventoSeleccionadoId);
+  }
+
+  get clienteEventoSeleccionado(): string {
+    const id = this.eventoSeleccionado?.clienteId;
+    if (!id) return '';
+    return this.clientes.find(c => c.id === id)?.nombre ?? '';
+  }
+
+  get fechaEventoSeleccionado(): string {
+    return this.eventoSeleccionado?.fecha ?? '';
+  }
+
+  get presupuestoCalculadoEvento(): number {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return 0;
+    const multiplier = evento.modoCalculo === 'Jornadas'
+      ? (evento.jornadas ?? 1)
+      : (evento.dias ?? 1);
+
+    const materialesCoste = (evento.materiales ?? []).reduce((acc, item) => {
+      if (!item.materialId || !item.cantidad) return acc;
+      const mat = this.materiales.find(m => m.id === item.materialId);
+      const tarifa = mat?.tarifaDia ?? 0;
+      return acc + item.cantidad * tarifa * multiplier;
+    }, 0);
+
+    const tecnicosCoste = (evento.tecnicosDetalle ?? []).reduce((acc, t) => {
+      const horas = t.horas ?? 0;
+      const tarifa = t.tarifaHora ?? 0;
+      return acc + horas * tarifa;
+    }, 0);
+
+    return materialesCoste + tecnicosCoste;
+  }
+
+  get eventosAceptados(): Evento[] {
+    return (this.eventos ?? [])
+      .filter(e => (e.presupuestoPresentado ?? 0) > 0 && e.presupuestoEstado === 'Aceptado')
+      .sort((a, b) => (a.fecha ?? '').localeCompare(b.fecha ?? ''));
+  }
+
+  get eventosPendientes(): Evento[] {
+    return (this.eventos ?? [])
+      .filter(e => (e.presupuestoPresentado ?? 0) <= 0 || e.presupuestoEstado !== 'Aceptado')
+      .sort((a, b) => (a.fecha ?? '').localeCompare(b.fecha ?? ''));
+  }
+
+  nombreCliente(id?: string): string {
+    if (!id) return '';
+    return this.clientes.find(c => c.id === id)?.nombre ?? '';
   }
 
   nombreMaterial(id?: string): string {

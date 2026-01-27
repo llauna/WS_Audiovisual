@@ -13,6 +13,27 @@ import { Reparacion } from '../model/reparacion';
 import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
 import { Cliente } from '../model/cliente';
 
+export interface AuthResponse {
+  username: string;
+  roles: string[];
+  authenticated: boolean;
+}
+
+export interface UsuarioSummary {
+  id?: string;
+  username?: string;
+  email?: string;
+  role?: string;
+  password?: string;
+}
+
+export interface UsuarioRequest {
+  username?: string;
+  email?: string;
+  password?: string;
+  role?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -101,6 +122,36 @@ export class ApiService {
 
   deleteNotaGasto(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/notas-gastos/${id}`);
+  }
+
+  // --- METODOS DE AUTH ---
+  login(username: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, { username, password });
+  }
+
+  me(): Observable<AuthResponse> {
+    return this.http.get<AuthResponse>(`${this.apiUrl}/auth/me`);
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {});
+  }
+
+  // --- METODOS DE USUARIOS ---
+  getUsuarios(): Observable<UsuarioSummary[]> {
+    return this.http.get<UsuarioSummary[]>(`${this.apiUrl}/usuarios`);
+  }
+
+  saveUsuario(payload: UsuarioRequest): Observable<UsuarioSummary> {
+    return this.http.post<UsuarioSummary>(`${this.apiUrl}/usuarios`, payload);
+  }
+
+  updateUsuario(id: string, payload: UsuarioRequest): Observable<UsuarioSummary> {
+    return this.http.put<UsuarioSummary>(`${this.apiUrl}/usuarios/${id}`, payload);
+  }
+
+  deleteUsuario(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/usuarios/${id}`);
   }
 
   // --- MÉTODOS DE EVENTOS ---

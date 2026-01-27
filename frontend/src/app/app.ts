@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service'; // Asegúrate de que apunte a api.service.ts
 import { Material } from './model/material';
 import { RouterOutlet } from '@angular/router';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -17,12 +17,11 @@ export class App implements OnInit {
   // Variables originales para pruebas
   mensajeBackend: string = 'Probando conexión con el backend...';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit() {
     // 1. Tu prueba de conexión original
     this.probarConexion();
-
   }
 
   probarConexion() {
@@ -36,8 +35,10 @@ export class App implements OnInit {
   }
 
   salir() {
-    if (confirm('Cerrar la aplicacion?')) {
-      window.close();
-    }
+    if (!confirm('Cerrar sesion?')) return;
+    this.apiService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
+    });
   }
 }

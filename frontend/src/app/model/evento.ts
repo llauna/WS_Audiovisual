@@ -9,6 +9,7 @@ export interface Evento {
   descripcion?: string;
   presupuesto?: number;
   presupuestoPresentado?: number;
+  presupuestoEstado?: 'Pendiente' | 'Aceptado' | 'Rechazado';
   tecnicos?: number;
   materiales?: EventoMaterial[];
   dias?: number;
