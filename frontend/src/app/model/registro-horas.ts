@@ -1,5 +1,6 @@
 export interface RegistroHoras {
   id?: string;
+  eventoId?: string;
   personalId: string;
   fecha: string; // YYYY-MM-DD
   horas: number;

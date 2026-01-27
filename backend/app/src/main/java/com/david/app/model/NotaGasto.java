@@ -4,17 +4,16 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "registro_horas")
+@Document(collection = "notas_gastos")
 @Data
-public class RegistroHoras {
+public class NotaGasto {
     @Id
     private String id;
 
     private String eventoId;
-    private String personalId;
+    private String productorId;
     private String fecha; // YYYY-MM-DD
-    private Double horas;
-    private String tipo; // Plantilla / Extra
-    private Double tarifaHora;
-    private String notas;
+    private String concepto;
+    private Double importe;
+    private String estado; // Pendiente / Pagado
 }

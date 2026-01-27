@@ -8,6 +8,7 @@ export interface Evento {
   color: 'blue' | 'orange' | 'green' | 'purple';
   descripcion?: string;
   presupuesto?: number;
+  presupuestoPresentado?: number;
   tecnicos?: number;
   materiales?: EventoMaterial[];
   dias?: number;

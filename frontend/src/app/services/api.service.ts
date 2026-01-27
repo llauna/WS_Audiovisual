@@ -6,6 +6,7 @@ import { Personal } from '../model/personal';
 import { Evento } from '../model/evento';
 import { Almacen } from '../model/almacen';
 import { RegistroHoras } from '../model/registro-horas';
+import { NotaGasto } from '../model/nota-gasto';
 import { Categoria } from '../model/categoria';
 import { Proveedor } from '../model/proveedor';
 import { Reparacion } from '../model/reparacion';
@@ -82,6 +83,24 @@ export class ApiService {
 
   deleteHora(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/horas/${id}`);
+  }
+
+  // --- METODOS DE NOTAS DE GASTOS ---
+  getNotasGasto(eventoId?: string): Observable<NotaGasto[]> {
+    const params = eventoId ? `?eventoId=${eventoId}` : '';
+    return this.http.get<NotaGasto[]>(`${this.apiUrl}/notas-gastos${params}`);
+  }
+
+  saveNotaGasto(nota: NotaGasto): Observable<NotaGasto> {
+    return this.http.post<NotaGasto>(`${this.apiUrl}/notas-gastos`, nota);
+  }
+
+  updateNotaGasto(id: string, nota: NotaGasto): Observable<NotaGasto> {
+    return this.http.put<NotaGasto>(`${this.apiUrl}/notas-gastos/${id}`, nota);
+  }
+
+  deleteNotaGasto(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/notas-gastos/${id}`);
   }
 
   // --- MÉTODOS DE EVENTOS ---

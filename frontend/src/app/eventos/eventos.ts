@@ -7,6 +7,8 @@ import { Evento, EventoTecnico } from '../model/evento';
 import { Material } from '../model/material';
 import { Personal } from '../model/personal';
 import { Cliente } from '../model/cliente';
+import { RegistroHoras } from '../model/registro-horas';
+import { NotaGasto } from '../model/nota-gasto';
 
 interface CalendarCell {
   date: Date | null;      // null = hueco
@@ -107,7 +109,16 @@ interface CalendarCell {
         </header>
 
         <div class="modal-body">
-          <div class="form-grid">
+          <div class="tabs">
+            <button class="tab-btn" [class.active]="activeTab === 'datos'" (click)="activeTab = 'datos'">Datos</button>
+            <button class="tab-btn" [class.active]="activeTab === 'material'" (click)="activeTab = 'material'">Material</button>
+            <button class="tab-btn" [class.active]="activeTab === 'tecnicos'" (click)="activeTab = 'tecnicos'">Tecnicos</button>
+            <button class="tab-btn" [class.active]="activeTab === 'horas'" (click)="activeTab = 'horas'">Horas</button>
+            <button class="tab-btn" [class.active]="activeTab === 'gastos'" (click)="activeTab = 'gastos'">Gastos</button>
+          </div>
+
+          <div class="tab-panel" *ngIf="activeTab === 'datos'">
+            <div class="form-grid">
             <label>
               T&iacute;tulo *
               <input type="text" [(ngModel)]="newEvent.titulo" />
@@ -174,44 +185,205 @@ interface CalendarCell {
             </label>
 
             <label class="field-compact">
+              Presupuesto presentado (&euro;)
+              <input class="input-compact" type="number" min="0" step="0.01" [(ngModel)]="newEvent.presupuestoPresentado" />
+            </label>
+
+            <label class="field-compact">
               N&ordm; t&eacute;cnicos
               <input class="input-compact" type="number" min="0" step="1" [(ngModel)]="newEvent.tecnicos" />
             </label>
-          </div>
-
-          <div class="summary">
-            <div><strong>Presupuesto calculado:</strong> {{ presupuestoCalculado | number:'1.2-2' }}</div>
-          </div>
-
-          <div class="materials">
-            <div class="materials-header">
-              <h4>Material necesario</h4>
-              <button class="btn-secondary" (click)="addMaterialRow()">+ A&ntilde;adir material</button>
             </div>
 
-            <div class="material-row" *ngFor="let m of newEvent.materiales; let i = index">
-              <select [(ngModel)]="m.materialId" (ngModelChange)="onMaterialChange(i)">
-                <option value="">Selecciona material</option>
-                <option *ngFor="let mat of materiales" [value]="mat.id">{{ mat.nombre }} ({{ mat.almacen }})</option>
-              </select>
-              <input type="number" min="1" step="1" placeholder="Cantidad" [(ngModel)]="m.cantidad" />
-              <button class="icon-btn danger" title="Eliminar" (click)="removeMaterialRow(i)">&times;</button>
+            <div class="summary">
+              <div><strong>Presupuesto calculado:</strong> {{ presupuestoCalculado | number:'1.2-2' }}</div>
+              <div *ngIf="newEvent.presupuestoPresentado != null">
+                <strong>Presupuesto presentado:</strong> {{ newEvent.presupuestoPresentado | number:'1.2-2' }}
+              </div>
+              <div *ngIf="diferenciaPresupuesto != null" [class.positive]="diferenciaPresupuesto >= 0" [class.negative]="diferenciaPresupuesto < 0">
+                <strong>Diferencia:</strong> {{ diferenciaPresupuesto | number:'1.2-2' }}
+              </div>
             </div>
           </div>
 
-          <div class="materials">
-            <div class="materials-header">
-              <h4>Tecnicos necesarios</h4>
-              <button class="btn-secondary" (click)="addTecnicoRow()">+ A&ntilde;adir tecnico</button>
-            </div>
+          <div class="tab-panel" *ngIf="activeTab === 'material'">
+            <div class="materials">
+              <div class="materials-header">
+                <h4>Material necesario</h4>
+                <button class="btn-secondary" (click)="addMaterialRow()">+ A&ntilde;adir material</button>
+              </div>
 
-            <div class="material-row" *ngFor="let t of newEvent.tecnicosDetalle; let i = index">
-              <select [(ngModel)]="t.personalId" (ngModelChange)="onTecnicoChange(i)">
-                <option value="">Selecciona tecnico</option>
-                <option *ngFor="let p of personal" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
-              </select>
-              <input type="number" min="0" step="0.25" placeholder="Horas" [(ngModel)]="t.horas" />
-              <button class="icon-btn danger" title="Eliminar" (click)="removeTecnicoRow(i)">&times;</button>
+              <div class="material-row" *ngFor="let m of newEvent.materiales; let i = index">
+                <select [(ngModel)]="m.materialId" (ngModelChange)="onMaterialChange(i)">
+                  <option value="">Selecciona material</option>
+                  <option *ngFor="let mat of materiales" [value]="mat.id">{{ mat.nombre }} ({{ mat.almacen }})</option>
+                </select>
+                <input type="number" min="1" step="1" placeholder="Cantidad" [(ngModel)]="m.cantidad" />
+                <button class="icon-btn danger" title="Eliminar" (click)="removeMaterialRow(i)">&times;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" *ngIf="activeTab === 'tecnicos'">
+            <div class="materials">
+              <div class="materials-header">
+                <h4>Tecnicos necesarios</h4>
+                <button class="btn-secondary" (click)="addTecnicoRow()">+ A&ntilde;adir tecnico</button>
+              </div>
+
+              <div class="material-row" *ngFor="let t of newEvent.tecnicosDetalle; let i = index">
+                <select [(ngModel)]="t.personalId" (ngModelChange)="onTecnicoChange(i)">
+                  <option value="">Selecciona tecnico</option>
+                  <option *ngFor="let p of personal" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
+                </select>
+                <input type="number" min="0" step="0.25" placeholder="Horas" [(ngModel)]="t.horas" />
+                <button class="icon-btn danger" title="Eliminar" (click)="removeTecnicoRow(i)">&times;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" *ngIf="activeTab === 'horas'">
+            <p class="muted" *ngIf="!isEditing">Guarda el evento para registrar horas.</p>
+            <div class="materials" *ngIf="isEditing">
+              <div class="materials-header">
+                <h4>Horas del personal</h4>
+                <span class="muted">Registro vinculado al evento</span>
+              </div>
+
+              <div class="hours-grid">
+                <label>
+                  Tecnico
+                  <select [(ngModel)]="nuevoRegistroEvento.personalId" (ngModelChange)="onRegistroTecnicoChange()">
+                    <option value="">Selecciona tecnico</option>
+                    <option *ngFor="let p of personal" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
+                  </select>
+                </label>
+                <label>
+                  Fecha
+                  <input type="date" [(ngModel)]="nuevoRegistroEvento.fecha">
+                </label>
+                <label>
+                  Horas
+                  <input type="number" min="0" step="0.25" [(ngModel)]="nuevoRegistroEvento.horas">
+                </label>
+                <label>
+                  Tarifa / hora
+                  <input type="number" min="0" step="0.01" [(ngModel)]="nuevoRegistroEvento.tarifaHora">
+                </label>
+                <label>
+                  Notas
+                  <input type="text" [(ngModel)]="nuevoRegistroEvento.notas" placeholder="Opcional">
+                </label>
+                <button class="btn-secondary" [disabled]="!newEvent.id" (click)="guardarHoraEvento()">
+                  Registrar horas
+                </button>
+              </div>
+
+              <table class="hours-table" *ngIf="registrosEvento.length">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Tecnico</th>
+                    <th>Horas</th>
+                    <th>Tarifa</th>
+                    <th>Coste</th>
+                    <th>Notas</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of registrosEvento">
+                    <td>{{ r.fecha }}</td>
+                    <td>{{ nombreTecnico(r.personalId) }}</td>
+                    <td>{{ r.horas }}</td>
+                    <td>{{ r.tarifaHora }}</td>
+                    <td>{{ costeRegistro(r) | number:'1.2-2' }}</td>
+                    <td>{{ r.notas }}</td>
+                    <td>
+                      <button class="mini-delete" (click)="eliminarHoraEvento(r.id)">&times;</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="muted" *ngIf="!registrosEvento.length">Sin registros de horas para este evento.</p>
+            </div>
+          </div>
+
+          <div class="tab-panel" *ngIf="activeTab === 'gastos'">
+            <p class="muted" *ngIf="!isEditing">Guarda el evento para registrar gastos.</p>
+            <div class="materials" *ngIf="isEditing">
+              <div class="materials-header">
+                <h4>Notas de gastos</h4>
+                <span class="muted">Solo productores asignados</span>
+              </div>
+
+              <p class="muted" *ngIf="productoresEvento.length === 0">No hay productores asignados en este evento.</p>
+
+              <div class="hours-grid" *ngIf="productoresEvento.length">
+                <label>
+                  Productor
+                  <select [(ngModel)]="nuevaNotaGasto.productorId">
+                    <option value="">Selecciona productor</option>
+                    <option *ngFor="let p of productoresEvento" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
+                  </select>
+                </label>
+                <label>
+                  Fecha
+                  <input type="date" [(ngModel)]="nuevaNotaGasto.fecha">
+                </label>
+                <label>
+                  Concepto
+                  <input type="text" [(ngModel)]="nuevaNotaGasto.concepto">
+                </label>
+                <label>
+                  Importe
+                  <input type="number" min="0" step="0.01" [(ngModel)]="nuevaNotaGasto.importe">
+                </label>
+                <label>
+                  Estado
+                  <select [(ngModel)]="nuevaNotaGasto.estado">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Pagado">Pagado</option>
+                  </select>
+                </label>
+                <button class="btn-secondary" (click)="guardarNotaGasto()">Registrar gasto</button>
+              </div>
+
+              <table class="hours-table" *ngIf="notasGasto.length">
+                <thead>
+                  <tr>
+                    <th>Productor</th>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Importe</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let n of notasGasto">
+                    <td>
+                      <select [(ngModel)]="n.productorId">
+                        <option *ngFor="let p of productoresEvento" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
+                      </select>
+                    </td>
+                    <td><input type="date" [(ngModel)]="n.fecha"></td>
+                    <td><input type="text" [(ngModel)]="n.concepto"></td>
+                    <td><input type="number" min="0" step="0.01" [(ngModel)]="n.importe"></td>
+                    <td>
+                      <select [(ngModel)]="n.estado">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Pagado">Pagado</option>
+                      </select>
+                    </td>
+                    <td>
+                      <button class="btn-link" (click)="actualizarNotaGasto(n)">Guardar</button>
+                      <button class="btn-link danger" (click)="borrarNotaGasto(n.id)">Eliminar</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="muted" *ngIf="!notasGasto.length">Sin notas de gastos para este evento.</p>
             </div>
           </div>
 
@@ -333,10 +505,13 @@ interface CalendarCell {
     }
     .modal {
       background: #fff;
-      width: min(860px, 95vw);
+      width: min(1100px, 96vw);
       border-radius: 14px;
       box-shadow: 0 12px 30px rgba(0,0,0,0.2);
       overflow: hidden;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
     }
     .modal-header, .modal-footer {
       padding: 1rem 1.5rem;
@@ -345,8 +520,19 @@ interface CalendarCell {
       justify-content: space-between;
       border-bottom: 1px solid #eee;
     }
-    .modal-footer { border-top: 1px solid #eee; border-bottom: none; }
-    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+      border-top: 1px solid #eee;
+      border-bottom: none;
+      background: #fff;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+    }
+    .modal-body {
+      padding: 1.5rem;
+      overflow: auto;
+      max-height: calc(90vh - 120px);
+    }
     .icon-btn {
       border: none;
       background: #f1f3f5;
@@ -359,10 +545,33 @@ interface CalendarCell {
     .icon-btn.danger { background: #ffe5e5; color: #b00020; }
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.2rem;
     }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      border: 1px solid #e5e7eb;
+      background: #f8f9fb;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #344054;
+    }
+    .tab-btn.active {
+      background: #2c3e50;
+      color: #fff;
+      border-color: #2c3e50;
+    }
+    .tab-panel { min-height: 160px; }
     .form-grid label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; color: #344054; }
     .form-grid input, .form-grid select, .form-grid textarea {
       border: 1px solid #d0d5dd;
@@ -412,8 +621,33 @@ interface CalendarCell {
       border-radius: 10px;
       cursor: pointer;
     }
+    .btn-link { background: none; border: none; color: #2c3e50; cursor: pointer; margin-right: 8px; }
+    .btn-link.danger { color: #c0392b; }
     .summary { margin: 0.5rem 0 1rem; padding: 0.75rem 1rem; background: #f8f9fb; border-radius: 10px; }
+    .summary .positive { color: #1b7b3a; }
+    .summary .negative { color: #b00020; }
     .errors { margin-top: 1rem; color: #b00020; font-weight: 600; }
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      align-items: end;
+      margin-bottom: 0.75rem;
+    }
+    .hours-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .hours-table th {
+      text-align: left;
+      padding: 0.6rem;
+      background: #f8f9fa;
+      color: #666;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .hours-table td {
+      padding: 0.6rem;
+      border-bottom: 1px solid #eee;
+      font-size: 0.85rem;
+    }
   `]
 })
 export class EventosComponent {
@@ -425,10 +659,15 @@ export class EventosComponent {
   materiales: Material[] = [];
   personal: Personal[] = [];
   clientes: Cliente[] = [];
+  registrosEvento: RegistroHoras[] = [];
+  nuevoRegistroEvento: RegistroHoras = this.resetRegistroEvento();
+  notasGasto: NotaGasto[] = [];
+  nuevaNotaGasto: NotaGasto = this.resetNotaGasto();
   showModal = false;
   validationErrors: string[] = [];
   newEvent: Evento = this.emptyEvent();
   isEditing = false;
+  activeTab: 'datos' | 'material' | 'tecnicos' | 'horas' | 'gastos' = 'datos';
 
   constructor(private api: ApiService) {
     this.loadEventos();
@@ -455,6 +694,11 @@ export class EventosComponent {
   openNewEventModal(): void {
     this.validationErrors = [];
     this.newEvent = this.emptyEvent();
+    this.registrosEvento = [];
+    this.nuevoRegistroEvento = this.resetRegistroEvento();
+    this.notasGasto = [];
+    this.nuevaNotaGasto = { ...this.resetNotaGasto(), fecha: this.newEvent.fecha };
+    this.activeTab = 'datos';
     this.isEditing = false;
     this.showModal = true;
   }
@@ -462,6 +706,10 @@ export class EventosComponent {
   openEditEvent(evento: Evento): void {
     this.validationErrors = [];
     this.newEvent = this.cloneEvent(evento);
+    this.loadHorasEvento(this.newEvent.id);
+    this.loadNotasGasto(this.newEvent.id);
+    this.nuevaNotaGasto = { ...this.resetNotaGasto(), fecha: this.newEvent.fecha };
+    this.activeTab = 'datos';
     this.isEditing = true;
     this.showModal = true;
   }
@@ -557,6 +805,11 @@ export class EventosComponent {
     }, 0);
 
     return materialesCoste + tecnicosCoste;
+  }
+
+  get diferenciaPresupuesto(): number | null {
+    if (this.newEvent.presupuestoPresentado == null) return null;
+    return (this.newEvent.presupuestoPresentado ?? 0) - this.presupuestoCalculado;
   }
 
   get calendarCells(): CalendarCell[] {
@@ -661,6 +914,7 @@ export class EventosComponent {
       color: this.colorForTipo('Evento'),
       descripcion: '',
       presupuesto: undefined,
+      presupuestoPresentado: undefined,
       tecnicos: undefined,
       materiales: [],
       dias: 1,
@@ -682,6 +936,7 @@ export class EventosComponent {
       color: evento.color ?? this.colorForTipo(tipo),
       descripcion: evento.descripcion ?? '',
       presupuesto: evento.presupuesto,
+      presupuestoPresentado: evento.presupuestoPresentado,
       tecnicos: evento.tecnicos,
       materiales: (evento.materiales ?? []).map(m => ({ ...m })),
       dias: evento.dias ?? 1,
@@ -717,6 +972,9 @@ export class EventosComponent {
     if (!evento.fecha) errors.push('La fecha es obligatoria.');
     if (!evento.tipo) errors.push('El tipo es obligatorio.');
     if (evento.presupuesto != null && evento.presupuesto < 0) errors.push('El presupuesto no puede ser negativo.');
+    if (evento.presupuestoPresentado != null && evento.presupuestoPresentado < 0) {
+      errors.push('El presupuesto presentado no puede ser negativo.');
+    }
     if (evento.tecnicos != null && evento.tecnicos < 0) errors.push('El n\u00famero de t\u00e9cnicos no puede ser negativo.');
     if ((evento.dias ?? 0) < 0) errors.push('Los dias no pueden ser negativos.');
     if ((evento.jornadas ?? 0) < 0) errors.push('Las jornadas no pueden ser negativas.');
@@ -732,6 +990,28 @@ export class EventosComponent {
     });
 
     return errors;
+  }
+
+  private resetRegistroEvento(): RegistroHoras {
+    return {
+      personalId: '',
+      fecha: '',
+      horas: 0,
+      tipo: 'Extra',
+      tarifaHora: 0,
+      notas: ''
+    };
+  }
+
+  private resetNotaGasto(): NotaGasto {
+    return {
+      eventoId: '',
+      productorId: '',
+      fecha: '',
+      concepto: '',
+      importe: 0,
+      estado: 'Pendiente'
+    };
   }
 
   private loadMateriales(): void {
@@ -752,6 +1032,130 @@ export class EventosComponent {
     this.api.getClientes().subscribe({
       next: (data) => this.clientes = data ?? [],
       error: (e) => console.error('Error cargando clientes:', e)
+    });
+  }
+
+  private loadHorasEvento(eventoId?: string): void {
+    if (!eventoId) {
+      this.registrosEvento = [];
+      return;
+    }
+    this.api.getHoras().subscribe({
+      next: (data) => {
+        this.registrosEvento = (data ?? []).filter(r => r.eventoId === eventoId);
+      },
+      error: (e) => console.error('Error cargando horas:', e)
+    });
+  }
+
+  private loadNotasGasto(eventoId?: string): void {
+    if (!eventoId) {
+      this.notasGasto = [];
+      return;
+    }
+    this.api.getNotasGasto(eventoId).subscribe({
+      next: (data) => {
+        this.notasGasto = data ?? [];
+      },
+      error: (e) => console.error('Error cargando notas de gasto:', e)
+    });
+  }
+
+  guardarHoraEvento(): void {
+    if (!this.newEvent.id) return;
+    if (!this.nuevoRegistroEvento.personalId || !this.nuevoRegistroEvento.fecha) {
+      alert('Tecnico y fecha son obligatorios');
+      return;
+    }
+    const payload: RegistroHoras = {
+      ...this.nuevoRegistroEvento,
+      eventoId: this.newEvent.id
+    };
+    this.api.saveHora(payload).subscribe({
+      next: () => {
+        this.loadHorasEvento(this.newEvent.id);
+        this.nuevoRegistroEvento = this.resetRegistroEvento();
+      },
+      error: (err) => alert(err?.error?.message || 'No se pudo guardar el registro')
+    });
+  }
+
+  guardarNotaGasto(): void {
+    if (!this.newEvent.id) return;
+    if (!this.nuevaNotaGasto.productorId || !this.nuevaNotaGasto.fecha || !this.nuevaNotaGasto.concepto) {
+      alert('Productor, fecha y concepto son obligatorios');
+      return;
+    }
+    if (!this.nuevaNotaGasto.importe || this.nuevaNotaGasto.importe <= 0) {
+      alert('El importe debe ser mayor que 0');
+      return;
+    }
+    const payload: NotaGasto = {
+      ...this.nuevaNotaGasto,
+      eventoId: this.newEvent.id
+    };
+    this.api.saveNotaGasto(payload).subscribe({
+      next: () => {
+        this.loadNotasGasto(this.newEvent.id);
+        this.nuevaNotaGasto = this.resetNotaGasto();
+      },
+      error: (err) => alert(err?.error?.message || 'No se pudo guardar la nota de gasto')
+    });
+  }
+
+  actualizarNotaGasto(nota: NotaGasto): void {
+    if (!nota.id) return;
+    this.api.updateNotaGasto(nota.id, nota).subscribe({
+      next: () => this.loadNotasGasto(this.newEvent.id),
+      error: (err) => alert(err?.error?.message || 'No se pudo actualizar la nota de gasto')
+    });
+  }
+
+  borrarNotaGasto(id?: string): void {
+    if (!id) return;
+    if (!confirm('Eliminar nota de gasto?')) return;
+    this.api.deleteNotaGasto(id).subscribe({
+      next: () => this.loadNotasGasto(this.newEvent.id),
+      error: (e) => console.error('Error eliminando nota de gasto:', e)
+    });
+  }
+
+  eliminarHoraEvento(id?: string): void {
+    if (!id) return;
+    if (!confirm('Eliminar registro de horas?')) return;
+    this.api.deleteHora(id).subscribe({
+      next: () => this.loadHorasEvento(this.newEvent.id),
+      error: (e) => console.error('Error eliminando horas:', e)
+    });
+  }
+
+  onRegistroTecnicoChange(): void {
+    const tecnico = this.personal.find(p => p.id === this.nuevoRegistroEvento.personalId);
+    if (!tecnico) return;
+    this.nuevoRegistroEvento.tarifaHora = tecnico.tarifaHora ?? 0;
+    this.nuevoRegistroEvento.tipo = tecnico.tipoContrato === 'Plantilla' ? 'Plantilla' : 'Extra';
+    if (!this.nuevoRegistroEvento.fecha) {
+      this.nuevoRegistroEvento.fecha = this.newEvent.fecha;
+    }
+  }
+
+  nombreTecnico(personalId?: string): string {
+    if (!personalId) return 'Desconocido';
+    const tecnico = this.personal.find(p => p.id === personalId);
+    return tecnico ? `${tecnico.nombre} ${tecnico.apellidos}` : 'Desconocido';
+  }
+
+  costeRegistro(registro: RegistroHoras): number {
+    return (registro.horas ?? 0) * (registro.tarifaHora ?? 0);
+  }
+
+  get productoresEvento(): Personal[] {
+    const ids = new Set((this.newEvent.tecnicosDetalle ?? [])
+      .map(t => t.personalId)
+      .filter((id): id is string => Boolean(id)));
+    return this.personal.filter(p => {
+      if (!p.id || !ids.has(p.id)) return false;
+      return (p.cargo ?? '').trim().toLowerCase() === 'productor';
     });
   }
 }

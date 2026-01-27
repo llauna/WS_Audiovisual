@@ -304,62 +304,72 @@ import { Cliente } from '../model/cliente';
             <button class="icon-btn" (click)="closeClientesModal()">&times;</button>
           </header>
           <div class="modal-body">
-            <div class="form-grid client-grid">
-              <label>
-                Nombre
-                <input [(ngModel)]="nuevoCliente.nombre" placeholder="Nombre">
-              </label>
-              <label>
-                NIF / CIF
-                <input [(ngModel)]="nuevoCliente.nif" placeholder="NIF / CIF">
-              </label>
-              <label>
-                Email
-                <input [(ngModel)]="nuevoCliente.email" placeholder="Email">
-              </label>
-              <label>
-                Telefono
-                <input [(ngModel)]="nuevoCliente.telefono" placeholder="Telefono">
-              </label>
-              <label>
-                Direccion
-                <input [(ngModel)]="nuevoCliente.direccion" placeholder="Direccion">
-              </label>
-              <label>
-                Persona de contacto
-                <input [(ngModel)]="nuevoCliente.contacto" placeholder="Persona de contacto">
-              </label>
-              <label class="span-2">
-                Notas
-                <textarea rows="3" [(ngModel)]="nuevoCliente.notas" placeholder="Notas"></textarea>
-              </label>
-              <div class="form-actions">
-                <button class="btn-primary" (click)="guardarCliente()">Agregar cliente</button>
+            <div class="tabs">
+              <button class="tab-btn" [class.active]="activeClientesTab === 'form'" (click)="activeClientesTab = 'form'">Nuevo</button>
+              <button class="tab-btn" [class.active]="activeClientesTab === 'lista'" (click)="activeClientesTab = 'lista'">Listado</button>
+            </div>
+
+            <div class="tab-panel" *ngIf="activeClientesTab === 'form'">
+              <div class="form-grid client-grid">
+                <label>
+                  Nombre
+                  <input [(ngModel)]="nuevoCliente.nombre" placeholder="Nombre">
+                </label>
+                <label>
+                  NIF / CIF
+                  <input [(ngModel)]="nuevoCliente.nif" placeholder="NIF / CIF">
+                </label>
+                <label>
+                  Email
+                  <input [(ngModel)]="nuevoCliente.email" placeholder="Email">
+                </label>
+                <label>
+                  Telefono
+                  <input [(ngModel)]="nuevoCliente.telefono" placeholder="Telefono">
+                </label>
+                <label>
+                  Direccion
+                  <input [(ngModel)]="nuevoCliente.direccion" placeholder="Direccion">
+                </label>
+                <label>
+                  Persona de contacto
+                  <input [(ngModel)]="nuevoCliente.contacto" placeholder="Persona de contacto">
+                </label>
+                <label class="span-2">
+                  Notas
+                  <textarea rows="3" [(ngModel)]="nuevoCliente.notas" placeholder="Notas"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="btn-primary" (click)="guardarCliente()">Agregar cliente</button>
+                </div>
               </div>
             </div>
-            <table class="modern-table" *ngIf="clientes.length">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>NIF</th>
-                  <th>Email</th>
-                  <th>Telefono</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let c of clientes">
-                  <td><input [(ngModel)]="c.nombre"></td>
-                  <td><input [(ngModel)]="c.nif"></td>
-                  <td><input [(ngModel)]="c.email"></td>
-                  <td><input [(ngModel)]="c.telefono"></td>
-                  <td>
-                    <button class="btn-link" (click)="actualizarCliente(c)">Guardar</button>
-                    <button class="btn-link danger" (click)="borrarCliente(c.id)">Eliminar</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+            <div class="tab-panel" *ngIf="activeClientesTab === 'lista'">
+              <table class="modern-table" *ngIf="clientes.length">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>NIF</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of clientes">
+                    <td><input [(ngModel)]="c.nombre"></td>
+                    <td><input [(ngModel)]="c.nif"></td>
+                    <td><input [(ngModel)]="c.email"></td>
+                    <td><input [(ngModel)]="c.telefono"></td>
+                    <td>
+                      <button class="btn-link" (click)="actualizarCliente(c)">Guardar</button>
+                      <button class="btn-link danger" (click)="borrarCliente(c.id)">Eliminar</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -386,6 +396,29 @@ import { Cliente } from '../model/cliente';
     .modern-table td { padding: 0.75rem; border-bottom: 1px solid #eee; }
     input, select, textarea { padding: 0.5rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; }
     label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; color: #344054; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      border: 1px solid #e5e7eb;
+      background: #f8f9fb;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #344054;
+    }
+    .tab-btn.active {
+      background: #2c3e50;
+      color: #fff;
+      border-color: #2c3e50;
+    }
+    .tab-panel { min-height: 160px; }
     .provider-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; column-gap: 24px; }
     .client-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; column-gap: 24px; }
     .reparacion-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; column-gap: 24px; }
@@ -461,6 +494,7 @@ export class MantenimientoComponent implements OnInit {
   materiales: Material[] = [];
   clientes: Cliente[] = [];
   nuevoCliente: Cliente = this.resetCliente();
+  activeClientesTab: 'form' | 'lista' = 'form';
   showCategoriasModal = false;
   showProveedoresModal = false;
   showReparacionesModal = false;
@@ -608,6 +642,7 @@ export class MantenimientoComponent implements OnInit {
 
   openClientesModal() {
     this.showClientesModal = true;
+    this.activeClientesTab = 'form';
   }
 
   closeClientesModal() {

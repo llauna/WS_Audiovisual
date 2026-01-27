@@ -35,6 +35,7 @@ public class Evento {
 
     private String descripcion;
     private Double presupuesto;
+    private Double presupuestoPresentado;
     private Integer tecnicos;
     private List<EventoMaterial> materiales;
     private Integer dias;

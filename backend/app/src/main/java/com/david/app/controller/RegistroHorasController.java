@@ -1,6 +1,7 @@
 package com.david.app.controller;
 
 import com.david.app.model.RegistroHoras;
+import com.david.app.repository.EventoRepository;
 import com.david.app.repository.PersonalRepository;
 import com.david.app.repository.RegistroHorasRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class RegistroHorasController {
 
     @Autowired
     private PersonalRepository personalRepository;
+
+    @Autowired
+    private EventoRepository eventoRepository;
 
     @GetMapping
     public List<RegistroHoras> getAll() {
@@ -50,6 +54,10 @@ public class RegistroHorasController {
         }
         if (!personalRepository.existsById(registro.getPersonalId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tecnico no existe");
+        }
+        if (registro.getEventoId() != null && !registro.getEventoId().trim().isEmpty()
+            && !eventoRepository.existsById(registro.getEventoId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El evento no existe");
         }
         if (registro.getFecha() == null || registro.getFecha().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha es obligatoria");

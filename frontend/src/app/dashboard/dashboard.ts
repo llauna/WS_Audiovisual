@@ -50,6 +50,15 @@ import { RouterLink } from '@angular/router';
           </div>
         </div>
 
+        <!-- SECCIÓN NOMINAS -->
+        <div class="card card-nominas" routerLink="/nominas">
+          <div class="card-icon">🧾</div>
+          <div class="card-info">
+            <h3>Nominas</h3>
+            <p>Horas de plantilla y autofacturas</p>
+          </div>
+        </div>
+
         <!-- SECCIÓN MANTENIMIENTO -->
         <div class="card card-mantenimiento" routerLink="/mantenimiento">
           <div class="card-icon">🛠️</div>
@@ -147,6 +156,7 @@ import { RouterLink } from '@angular/router';
     .card-eventos:hover { background: linear-gradient(to right, #fff, #f0f9ff); border-bottom: 4px solid #3182ce; }
     .card-presupuestos:hover { background: linear-gradient(to right, #fff, #f0fff4); border-bottom: 4px solid #38a169; }
     .card-personal:hover { background: linear-gradient(to right, #fff, #faf5ff); border-bottom: 4px solid #805ad5; }
+    .card-nominas:hover { background: linear-gradient(to right, #fff, #f0fdf4); border-bottom: 4px solid #16a34a; }
     .card-mantenimiento:hover { background: linear-gradient(to right, #fff, #fff5f5); border-bottom: 4px solid #e53e3e; }
     .card-config:hover { background: linear-gradient(to right, #fff, #f7fafc); border-bottom: 4px solid #718096; }
   `]

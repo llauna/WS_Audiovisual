@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'presupuestos', loadComponent: () => import('./presupuestos/presupuestos').then(m => m.PresupuestosComponent) },
   { path: 'personal',
   loadComponent: () => import('./personal/personal').then(m => m.PersonalComponent) },
+  { path: 'nominas', loadComponent: () => import('./nominas/nominas').then(m => m.NominasComponent) },
   { path: 'mantenimiento', loadComponent: () => import('./mantenimiento/mantenimiento').then(m => m.MantenimientoComponent) },
   { path: 'configuracion', loadComponent: () => import('./configuracion/configuracion').then(m => m.ConfiguracionComponent) },
   { path: '**', redirectTo: '' }
