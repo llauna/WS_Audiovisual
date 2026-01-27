@@ -34,4 +34,10 @@ export class App implements OnInit {
       }
     });
   }
+
+  salir() {
+    if (confirm('Cerrar la aplicacion?')) {
+      window.close();
+    }
+  }
 }

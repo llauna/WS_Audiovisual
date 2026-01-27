@@ -16,6 +16,7 @@ public class Evento {
 
     private String titulo;
     private String ubicacion;
+    private String clienteId;
 
     /**
      * Formato recomendado: YYYY-MM-DD (ej: 2026-03-15)

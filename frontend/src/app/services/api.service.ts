@@ -10,6 +10,7 @@ import { Categoria } from '../model/categoria';
 import { Proveedor } from '../model/proveedor';
 import { Reparacion } from '../model/reparacion';
 import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
+import { Cliente } from '../model/cliente';
 
 @Injectable({
   providedIn: 'root'
@@ -166,5 +167,22 @@ export class ApiService {
 
   deleteSolicitudPresupuesto(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/solicitudes-presupuesto/${id}`);
+  }
+
+  // --- METODOS DE CLIENTES ---
+  getClientes(): Observable<Cliente[]> {
+    return this.http.get<Cliente[]>(`${this.apiUrl}/clientes`);
+  }
+
+  saveCliente(cliente: Cliente): Observable<Cliente> {
+    return this.http.post<Cliente>(`${this.apiUrl}/clientes`, cliente);
+  }
+
+  updateCliente(id: string, cliente: Cliente): Observable<Cliente> {
+    return this.http.put<Cliente>(`${this.apiUrl}/clientes/${id}`, cliente);
+  }
+
+  deleteCliente(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/clientes/${id}`);
   }
 }

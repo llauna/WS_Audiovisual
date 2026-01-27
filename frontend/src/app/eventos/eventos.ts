@@ -6,6 +6,7 @@ import { ApiService } from '../services/api.service';
 import { Evento, EventoTecnico } from '../model/evento';
 import { Material } from '../model/material';
 import { Personal } from '../model/personal';
+import { Cliente } from '../model/cliente';
 
 interface CalendarCell {
   date: Date | null;      // null = hueco
@@ -122,6 +123,14 @@ interface CalendarCell {
               <input type="text" [(ngModel)]="newEvent.ubicacion" />
             </label>
 
+            <label>
+              Cliente
+              <select [(ngModel)]="newEvent.clienteId">
+                <option value="">Selecciona cliente</option>
+                <option *ngFor="let c of clientes" [value]="c.id">{{ c.nombre }}</option>
+              </select>
+            </label>
+
             <div class="inline-pair span-2">
               <label class="field-compact">
                 Tipo *
@@ -226,13 +235,15 @@ interface CalendarCell {
     .muted { color: #7a7a7a; margin: 0.25rem 0 0; }
 
     .calendar-layout { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; }
+    .calendar-main { min-width: 0; }
     .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
     .calendar-header { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-bottom: 1.5rem; }
     .btn-nav { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 18px; }
     .btn-nav:hover { background: #f7f7f7; }
 
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); border: 1px solid #eee; border-radius: 10px; overflow: hidden; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid #eee; border-radius: 10px; overflow: hidden; width: 100%; }
+    .calendar-grid > * { min-width: 0; }
     .day-name { padding: 10px; text-align: center; background: #f8f9fa; font-weight: 600; border-right: 1px solid #eee; }
     .day-name:last-child { border-right: none; }
 
@@ -413,6 +424,7 @@ export class EventosComponent {
   eventos: Evento[] = [];
   materiales: Material[] = [];
   personal: Personal[] = [];
+  clientes: Cliente[] = [];
   showModal = false;
   validationErrors: string[] = [];
   newEvent: Evento = this.emptyEvent();
@@ -422,6 +434,7 @@ export class EventosComponent {
     this.loadEventos();
     this.loadMateriales();
     this.loadPersonal();
+    this.loadClientes();
   }
 
   loadEventos(): void {
@@ -642,6 +655,7 @@ export class EventosComponent {
     return {
       titulo: '',
       ubicacion: '',
+      clienteId: '',
       fecha,
       tipo: 'Evento',
       color: this.colorForTipo('Evento'),
@@ -662,6 +676,7 @@ export class EventosComponent {
       id: evento.id,
       titulo: evento.titulo ?? '',
       ubicacion: evento.ubicacion ?? '',
+      clienteId: evento.clienteId ?? '',
       fecha: evento.fecha ?? this.toIsoDate(new Date()),
       tipo,
       color: evento.color ?? this.colorForTipo(tipo),
@@ -730,6 +745,13 @@ export class EventosComponent {
     this.api.getPersonal().subscribe({
       next: (data) => this.personal = data ?? [],
       error: (e) => console.error('Error cargando personal:', e)
+    });
+  }
+
+  private loadClientes(): void {
+    this.api.getClientes().subscribe({
+      next: (data) => this.clientes = data ?? [],
+      error: (e) => console.error('Error cargando clientes:', e)
     });
   }
 }

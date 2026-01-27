@@ -24,6 +24,23 @@
 
     a { color: white; text-decoration: none; cursor: pointer; }
   }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-exit {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-exit:hover { background: #a93226; }
 }
 
 /* Estilos del Desplegable (Dropdown) */
