@@ -139,31 +139,92 @@ import { Cliente } from '../model/cliente';
               Cliente
               <input [value]="clienteEventoSeleccionado" placeholder="Cliente" disabled>
             </label>
-            <label class="field-span-2">
-              Presupuesto calculado
-              <input [value]="presupuestoCalculadoEvento | number:'1.2-2'" disabled>
-            </label>
-            <div class="field-spacer" aria-hidden="true"></div>
-            <label class="field-span-2">
-              Importe presentado
-              <input type="number" min="0" step="0.01" [(ngModel)]="importePresentado">
-            </label>
-            <div class="field-spacer" aria-hidden="true"></div>
-            <label class="field-span-2">
-              Estado
-              <select [(ngModel)]="estadoPresupuesto">
-                <option value="Pendiente">Pendiente</option>
-                <option value="Aceptado">Aceptado</option>
-                <option value="Rechazado">Rechazado</option>
-              </select>
-            </label>
-            <div class="field-spacer" aria-hidden="true"></div>
-            <label class="field-span-3">
-              Fecha evento
-              <input [value]="fechaEventoSeleccionado" disabled>
-            </label>
-            <div class="field-spacer" aria-hidden="true"></div>
-            <button class="btn-primary field-span-3" (click)="guardarPresupuestoEvento()">Presentar presupuesto</button>
+              <label class="field-span-2">
+                Ppto. calculado
+                <input class="input-compact" [value]="presupuestoCalculadoEvento | number:'1.2-2'" disabled>
+              </label>
+              <label class="field-span-2">
+                Importe presentado
+                <input class="input-compact" type="number" min="0" step="0.01" [(ngModel)]="importePresentado" disabled>
+              </label>
+              <label class="field-span-2">
+                GM (%)
+                <input class="input-compact" type="number" min="0" step="0.01" [(ngModel)]="granMargenPct" (ngModelChange)="onGranMargenChange()">
+              </label>
+              <label class="field-span-2">
+                Estado
+                <select class="input-compact" [(ngModel)]="estadoPresupuesto">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Aceptado">Aceptado</option>
+                  <option value="Rechazado">Rechazado</option>
+                </select>
+              </label>
+              <label class="field-span-3">
+                Fecha evento
+                <input class="input-compact" [value]="fechaEventoSeleccionado" disabled>
+              </label>
+              <button class="btn-primary field-span-3" (click)="guardarPresupuestoEvento()">Presentar presupuesto</button>
+          </div>
+          <div class="quote-breakdown" *ngIf="eventoSeleccionado">
+            <h4>Detalle del presupuesto</h4>
+            <div class="quote-meta">
+              <div><strong>Duracion:</strong> {{ duracionLabel }}</div>
+              <div><strong>Coste tecnicos:</strong> {{ tecnicosCosteEvento | number:'1.2-2' }}</div>
+              <div><strong>Coste material:</strong> {{ materialesCosteEvento | number:'1.2-2' }}</div>
+              <div><strong>Coste total:</strong> {{ presupuestoCalculadoEvento | number:'1.2-2' }}</div>
+              <div><strong>Gran margen:</strong> {{ granMargenImporte | number:'1.2-2' }}</div>
+              <div><strong>Total con margen:</strong> {{ totalConMargen | number:'1.2-2' }}</div>
+            </div>
+
+            <table class="modern-table" *ngIf="materialesDetalle.length; else sinMaterial">
+              <thead>
+                <tr>
+                  <th>Duracion</th>
+                  <th>Material</th>
+                  <th>Unidades</th>
+                  <th>Precio</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of materialesDetalle">
+                  <td>{{ duracionLabel }}</td>
+                  <td>{{ m.nombre }}</td>
+                  <td>{{ m.cantidad }}</td>
+                  <td>{{ m.tarifa | number:'1.2-2' }}</td>
+                  <td>{{ m.totalConMargen | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #sinMaterial>
+              <p class="muted">No hay material asociado.</p>
+            </ng-template>
+
+            <table class="modern-table" *ngIf="tecnicosDetalle.length; else sinTecnicos">
+              <thead>
+                <tr>
+                  <th>Tecnico</th>
+                  <th>Horas</th>
+                  <th>Tarifa</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let t of tecnicosDetalle">
+                  <td>{{ t.nombre }}</td>
+                  <td>{{ t.horas }}</td>
+                  <td>{{ t.tarifa | number:'1.2-2' }}</td>
+                  <td>{{ t.totalConMargen | number:'1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #sinTecnicos>
+              <p class="muted">No hay tecnicos asociados.</p>
+            </ng-template>
+
+            <div class="quote-actions">
+              <button class="btn-secondary" (click)="generarCorreoPresupuesto()">Generar correo</button>
+            </div>
           </div>
         </div>
       </div>
@@ -298,7 +359,7 @@ import { Cliente } from '../model/cliente';
     .btn-primary { background: #2c3e50; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; }
     .btn-success { background: #27ae60; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1rem; cursor: pointer; }
     .btn-success:hover { background: #219150; }
-    .form-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 14px; row-gap: 10px; margin-bottom: 1rem; }
+    .form-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 20px; row-gap: 10px; margin-bottom: 1rem; }
     .form-grid label { display: flex; flex-direction: column; gap: 6px; }
     .field-span-6 { grid-column: span 6; }
     .field-span-3 { grid-column: span 3; }
@@ -318,6 +379,16 @@ import { Cliente } from '../model/cliente';
     .modern-table { width: 100%; border-collapse: collapse; }
     .modern-table th { text-align: left; padding: 0.75rem; background: #f8f9fa; color: #666; font-weight: 600; }
     .modern-table td { padding: 0.75rem; border-bottom: 1px solid #eee; }
+    .quote-breakdown { margin-top: 1.5rem; }
+    .quote-breakdown h4 { margin: 0 0 0.75rem; }
+    .quote-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+    .quote-actions { margin-top: 1rem; }
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -332,6 +403,13 @@ import { Cliente } from '../model/cliente';
     .status-pill.pending { background: #fff4e5; color: #a16207; }
     .status-pill.rejected { background: #ffe9e9; color: #b42318; }
     input, select { padding: 0.5rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; width: 100%; }
+    .input-compact {
+      padding: 0.35rem 0.5rem;
+      font-size: 0.85rem;
+      height: 34px;
+      line-height: 1.2;
+      box-sizing: border-box;
+    }
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -389,6 +467,7 @@ export class PresupuestosComponent implements OnInit {
   showSolicitudesRecientesModal = false;
   showEventosAceptadosModal = false;
   showEventosPendientesModal = false;
+  granMargenPct = 0;
 
   constructor(private apiService: ApiService) {}
 
@@ -463,11 +542,14 @@ export class PresupuestosComponent implements OnInit {
     if (!evento) {
       this.importePresentado = 0;
       this.estadoPresupuesto = 'Pendiente';
+      this.granMargenPct = 0;
       return;
     }
     const base = this.presupuestoCalculadoEvento;
     this.importePresentado = evento.presupuestoPresentado ?? base;
     this.estadoPresupuesto = evento.presupuestoEstado ?? 'Pendiente';
+    this.granMargenPct = 0;
+    this.syncImportePresentado();
   }
 
   guardarPresupuestoEvento() {
@@ -549,20 +631,137 @@ export class PresupuestosComponent implements OnInit {
       ? (evento.jornadas ?? 1)
       : (evento.dias ?? 1);
 
-    const materialesCoste = (evento.materiales ?? []).reduce((acc, item) => {
+    return this.materialesCosteEvento + this.tecnicosCosteEvento;
+  }
+
+  get materialesCosteEvento(): number {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return 0;
+    const multiplier = evento.modoCalculo === 'Jornadas'
+      ? (evento.jornadas ?? 1)
+      : (evento.dias ?? 1);
+    return (evento.materiales ?? []).reduce((acc, item) => {
       if (!item.materialId || !item.cantidad) return acc;
       const mat = this.materiales.find(m => m.id === item.materialId);
       const tarifa = mat?.tarifaDia ?? 0;
       return acc + item.cantidad * tarifa * multiplier;
     }, 0);
+  }
 
-    const tecnicosCoste = (evento.tecnicosDetalle ?? []).reduce((acc, t) => {
+  get tecnicosCosteEvento(): number {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return 0;
+    const multiplier = evento.modoCalculo === 'Jornadas'
+      ? (evento.jornadas ?? 1)
+      : (evento.dias ?? 1);
+    return (evento.tecnicosDetalle ?? []).reduce((acc, t) => {
       const horas = t.horas ?? 0;
       const tarifa = t.tarifaHora ?? 0;
-      return acc + horas * tarifa;
+      return acc + horas * tarifa * multiplier;
     }, 0);
+  }
 
-    return materialesCoste + tecnicosCoste;
+  get granMargenImporte(): number {
+    const base = this.presupuestoCalculadoEvento;
+    const pct = this.granMargenPct ?? 0;
+    return base * (pct / 100);
+  }
+
+  get totalConMargen(): number {
+    return this.presupuestoCalculadoEvento + this.granMargenImporte;
+  }
+
+  get duracionLabel(): string {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return '';
+    if (evento.modoCalculo === 'Jornadas') {
+      return `${evento.jornadas ?? 0} jornadas`;
+    }
+    return `${evento.dias ?? 0} dias`;
+  }
+
+  get materialesDetalle(): { nombre: string; cantidad: number; tarifa: number; total: number; totalConMargen: number }[] {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return [];
+    const multiplier = evento.modoCalculo === 'Jornadas'
+      ? (evento.jornadas ?? 1)
+      : (evento.dias ?? 1);
+    const marginFactor = 1 + ((this.granMargenPct ?? 0) / 100);
+    return (evento.materiales ?? []).map(item => {
+      const mat = this.materiales.find(m => m.id === item.materialId);
+      const tarifa = mat?.tarifaDia ?? 0;
+      const cantidad = item.cantidad ?? 0;
+      const total = cantidad * tarifa * multiplier;
+      return {
+        nombre: mat?.nombre ?? item.nombre ?? 'Sin nombre',
+        cantidad,
+        tarifa,
+        total,
+        totalConMargen: total * marginFactor
+      };
+    }).filter(m => m.cantidad > 0);
+  }
+
+  get tecnicosDetalle(): { nombre: string; horas: number; tarifa: number; total: number; totalConMargen: number }[] {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return [];
+    const multiplier = evento.modoCalculo === 'Jornadas'
+      ? (evento.jornadas ?? 1)
+      : (evento.dias ?? 1);
+    const marginFactor = 1 + ((this.granMargenPct ?? 0) / 100);
+    return (evento.tecnicosDetalle ?? []).map(t => {
+      const horas = t.horas ?? 0;
+      const tarifa = t.tarifaHora ?? 0;
+      const total = horas * tarifa * multiplier;
+      return {
+        nombre: t.nombre ?? 'Sin nombre',
+        horas,
+        tarifa,
+        total,
+        totalConMargen: total * marginFactor
+      };
+    }).filter(t => t.horas > 0);
+  }
+
+  onGranMargenChange() {
+    this.syncImportePresentado();
+  }
+
+  private syncImportePresentado() {
+    this.importePresentado = this.totalConMargen;
+  }
+
+  generarCorreoPresupuesto() {
+    const evento = this.eventoSeleccionado;
+    if (!evento) return;
+    const cliente = this.clienteEventoSeleccionado || 'Cliente';
+    const asunto = `Presupuesto - ${evento.titulo ?? 'Evento'}`;
+    const lineasMaterial = this.materialesDetalle
+      .map(m => `- ${m.nombre} | ${m.cantidad} uds | ${m.tarifa.toFixed(2)} | ${m.total.toFixed(2)}`)
+      .join('\n');
+
+    const cuerpo = [
+      `Cliente: ${cliente}`,
+      `Evento: ${evento.titulo ?? ''}`,
+      `Fecha: ${evento.fecha ?? ''}`,
+      `Duracion: ${this.duracionLabel}`,
+      '',
+      'Material:',
+      lineasMaterial || '- Sin material',
+      '',
+      `Coste tecnicos: ${this.tecnicosCosteEvento.toFixed(2)}`,
+      `Coste material: ${this.materialesCosteEvento.toFixed(2)}`,
+      `Coste total: ${this.presupuestoCalculadoEvento.toFixed(2)}`,
+      `Gran margen (${(this.granMargenPct ?? 0).toFixed(2)}%): ${this.granMargenImporte.toFixed(2)}`,
+      `Total con margen: ${this.totalConMargen.toFixed(2)}`,
+      '',
+      `Importe presentado: ${(this.importePresentado ?? 0).toFixed(2)}`
+    ].join('\n');
+
+    const mailto = `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    if (typeof window !== 'undefined') {
+      window.location.href = mailto;
+    }
   }
 
   get eventosAceptados(): Evento[] {

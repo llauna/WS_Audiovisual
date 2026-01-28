@@ -275,7 +275,16 @@ import { Categoria } from '../model/categoria';
                       (change)="actualizarStockReparacion(m)"
                     >
                   </td>
-                  <td>{{ m.tarifaDia }}</td>
+                  <td>
+                    <input
+                      class="inline-input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      [(ngModel)]="m.tarifaDia"
+                      (change)="actualizarTarifaDia(m)"
+                    >
+                  </td>
                   <td>{{ m.stockReservado }}</td>
                   <td>{{ m.stockDisponible }}</td>
                   <td><button class="btn-link" (click)="borrarMaterial(m.id)">Eliminar</button></td>
@@ -619,6 +628,19 @@ export class AlmacenComponent implements OnInit {
     this.apiService.updateMaterial(material.id, material).subscribe({
       next: () => this.cargarMateriales(),
       error: (err) => alert(err?.error?.message || 'No se pudo actualizar el stock en reparacion')
+    });
+  }
+
+  actualizarTarifaDia(material: Material) {
+    if (!material.id) return;
+    if ((material.tarifaDia ?? 0) < 0) {
+      alert('La tarifa dia no puede ser negativa');
+      material.tarifaDia = 0;
+      return;
+    }
+    this.apiService.updateMaterial(material.id, material).subscribe({
+      next: () => this.cargarMateriales(),
+      error: (err) => alert(err?.error?.message || 'No se pudo actualizar la tarifa dia')
     });
   }
 

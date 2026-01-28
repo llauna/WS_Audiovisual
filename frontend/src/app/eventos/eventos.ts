@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../services/api.service';
-import { Evento, EventoTecnico } from '../model/evento';
+import { Evento, EventoMaterial, EventoTecnico } from '../model/evento';
 import { Material } from '../model/material';
 import { Personal } from '../model/personal';
 import { Cliente } from '../model/cliente';
@@ -213,13 +213,27 @@ interface CalendarCell {
                 <button class="btn-secondary" (click)="addMaterialRow()">+ A&ntilde;adir material</button>
               </div>
 
+              <div class="material-row material-row-header" *ngIf="newEvent.materiales?.length">
+                <span>Material</span>
+                <span>Cantidad</span>
+                <span>Tarifa / d&iacute;a</span>
+                <span>Coste</span>
+                <span></span>
+              </div>
+
               <div class="material-row" *ngFor="let m of newEvent.materiales; let i = index">
                 <select [(ngModel)]="m.materialId" (ngModelChange)="onMaterialChange(i)">
                   <option value="">Selecciona material</option>
                   <option *ngFor="let mat of materiales" [value]="mat.id">{{ mat.nombre }} ({{ mat.almacen }})</option>
                 </select>
                 <input type="number" min="1" step="1" placeholder="Cantidad" [(ngModel)]="m.cantidad" />
+                <span class="material-value">{{ materialTarifa(m) | number:'1.2-2' }}</span>
+                <span class="material-value">{{ materialSubtotal(m) | number:'1.2-2' }}</span>
                 <button class="icon-btn danger" title="Eliminar" (click)="removeMaterialRow(i)">&times;</button>
+              </div>
+
+              <div class="materials-summary" *ngIf="newEvent.materiales?.length">
+                <strong>Total material:</strong> {{ totalMaterialesCoste | number:'1.2-2' }}
               </div>
             </div>
           </div>
@@ -231,7 +245,7 @@ interface CalendarCell {
                 <button class="btn-secondary" (click)="addTecnicoRow()">+ A&ntilde;adir tecnico</button>
               </div>
 
-              <div class="material-row" *ngFor="let t of newEvent.tecnicosDetalle; let i = index">
+              <div class="tecnico-row" *ngFor="let t of newEvent.tecnicosDetalle; let i = index">
                 <select [(ngModel)]="t.personalId" (ngModelChange)="onTecnicoChange(i)">
                   <option value="">Selecciona tecnico</option>
                   <option *ngFor="let p of personal" [value]="p.id">{{ p.nombre }} {{ p.apellidos }}</option>
@@ -296,7 +310,7 @@ interface CalendarCell {
                     <td>{{ r.fecha }}</td>
                     <td>{{ nombreTecnico(r.personalId) }}</td>
                     <td>{{ r.horas }}</td>
-                    <td>{{ r.tarifaHora }}</td>
+                    <td>{{ r.tarifaHora | number:'1.2-2' }}</td>
                     <td>{{ costeRegistro(r) | number:'1.2-2' }}</td>
                     <td>{{ r.notas }}</td>
                     <td>
@@ -612,7 +626,31 @@ interface CalendarCell {
     .span-2 { grid-column: span 2; }
     .materials { margin-top: 0.5rem; }
     .materials-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-    .material-row { display: grid; grid-template-columns: 1fr 120px 40px; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .material-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 110px 120px 140px 40px;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+    .tecnico-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 40px;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+    .material-row-header {
+      font-size: 0.85rem;
+      color: #667085;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .material-value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .materials-summary { margin-top: 0.75rem; font-size: 0.9rem; }
     .btn-secondary {
       background: #eef2f6;
       color: #344054;
@@ -754,6 +792,17 @@ export class EventosComponent {
     item.nombre = material?.nombre ?? '';
   }
 
+  materialTarifa(item: EventoMaterial): number {
+    if (!item.materialId) return 0;
+    const material = this.materiales.find(m => m.id === item.materialId);
+    return material?.tarifaDia ?? 0;
+  }
+
+  materialSubtotal(item: EventoMaterial): number {
+    const cantidad = item.cantidad ?? 0;
+    return cantidad * this.materialTarifa(item) * this.multiplier();
+  }
+
   syncColorWithTipo(): void {
     this.newEvent.color = this.colorForTipo(this.newEvent.tipo);
   }
@@ -791,25 +840,26 @@ export class EventosComponent {
   }
 
   get presupuestoCalculado(): number {
-    const materialesCoste = (this.newEvent.materiales ?? []).reduce((acc, item) => {
-      if (!item.materialId || !item.cantidad) return acc;
-      const mat = this.materiales.find(m => m.id === item.materialId);
-      const tarifa = mat?.tarifaDia ?? 0;
-      return acc + item.cantidad * tarifa * this.multiplier();
-    }, 0);
-
-    const tecnicosCoste = (this.newEvent.tecnicosDetalle ?? []).reduce((acc, t) => {
-      const horas = t.horas ?? 0;
-      const tarifa = t.tarifaHora ?? 0;
-      return acc + horas * tarifa;
-    }, 0);
-
-    return materialesCoste + tecnicosCoste;
+    return this.totalMaterialesCoste + this.totalTecnicosCoste;
   }
 
   get diferenciaPresupuesto(): number | null {
     if (this.newEvent.presupuestoPresentado == null) return null;
     return (this.newEvent.presupuestoPresentado ?? 0) - this.presupuestoCalculado;
+  }
+
+  get totalMaterialesCoste(): number {
+    return (this.newEvent.materiales ?? []).reduce((acc, item) => {
+      return acc + this.materialSubtotal(item);
+    }, 0);
+  }
+
+  get totalTecnicosCoste(): number {
+    return (this.newEvent.tecnicosDetalle ?? []).reduce((acc, t) => {
+      const horas = t.horas ?? 0;
+      const tarifa = t.tarifaHora ?? 0;
+      return acc + horas * tarifa * this.multiplier();
+    }, 0);
   }
 
   get calendarCells(): CalendarCell[] {
