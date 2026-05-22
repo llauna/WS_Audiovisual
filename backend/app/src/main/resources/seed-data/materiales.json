@@ -1,0 +1,98 @@
+[
+  {
+    "nombre": "Cámara Sony FX9",
+    "categoria": "Cámaras",
+    "stockTotal": 8,
+    "stockDisponible": 5,
+    "stockReservado": 2,
+    "stockReparacion": 1,
+    "tarifaDia": 150.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "A-01-15",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Trípode Manfrotto 504HD",
+    "categoria": "Trípodes",
+    "stockTotal": 12,
+    "stockDisponible": 8,
+    "stockReservado": 3,
+    "stockReparacion": 1,
+    "tarifaDia": 25.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "B-02-08",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Monitor Sony OLED 7\"",
+    "categoria": "Monitores",
+    "stockTotal": 6,
+    "stockDisponible": 4,
+    "stockReservado": 1,
+    "stockReparacion": 1,
+    "tarifaDia": 75.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "C-03-12",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Micrófono Sennheiser MKH 416",
+    "categoria": "Audio",
+    "stockTotal": 10,
+    "stockDisponible": 6,
+    "stockReservado": 3,
+    "stockReparacion": 1,
+    "tarifaDia": 35.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "D-04-20",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Set de luces LED ARRI SkyPanel",
+    "categoria": "Iluminación",
+    "stockTotal": 4,
+    "stockDisponible": 2,
+    "stockReservado": 1,
+    "stockReparacion": 1,
+    "tarifaDia": 200.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "E-05-25",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Grabadora Sound Devices MixPre-6",
+    "categoria": "Audio",
+    "stockTotal": 5,
+    "stockDisponible": 3,
+    "stockReservado": 1,
+    "stockReparacion": 1,
+    "tarifaDia": 60.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "D-04-21",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Objetivo Canon 24-70mm f/2.8",
+    "categoria": "Ópticas",
+    "stockTotal": 8,
+    "stockDisponible": 5,
+    "stockReservado": 2,
+    "stockReparacion": 1,
+    "tarifaDia": 45.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "A-01-16",
+    "estado": "Disponible"
+  },
+  {
+    "nombre": "Dron DJI Inspire 2",
+    "categoria": "Drones",
+    "stockTotal": 3,
+    "stockDisponible": 2,
+    "stockReservado": 1,
+    "stockReparacion": 0,
+    "tarifaDia": 300.00,
+    "almacen": "Almacén Central",
+    "ubicacionAlmacen": "F-06-30",
+    "estado": "Disponible"
+  }
+]

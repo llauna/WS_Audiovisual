@@ -21,7 +21,7 @@ import { Cliente } from '../model/cliente';
           <h2>Mantenimiento</h2>
           <p class="muted">Estado de equipos y reparaciones</p>
         </div>
-        <a class="btn-secondary" routerLink="/">Inicio</a>
+        <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
       </header>
 
       <div class="cards-grid">

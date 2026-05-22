@@ -15,7 +15,7 @@ import { ApiService, UsuarioSummary, UsuarioRequest } from '../services/api.serv
           <h2>Configuracion</h2>
           <p class="muted">Ajustes del sistema y usuarios</p>
         </div>
-        <a class="btn-secondary" routerLink="/">Inicio</a>
+        <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
       </header>
 
       <div class="card">

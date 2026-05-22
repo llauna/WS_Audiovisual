@@ -18,7 +18,7 @@ import { Categoria } from '../model/categoria';
           <h2>Gestion de almacen</h2>
           <p class="muted">Inventario tecnico por almacen</p>
         </div>
-        <a class="btn-secondary" routerLink="/">Inicio</a>
+        <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
       </header>
 
       <section class="card">
@@ -42,6 +42,15 @@ import { Categoria } from '../model/categoria';
             </select>
           </label>
           <label>
+            Buscar
+            <input
+              type="search"
+              [(ngModel)]="busquedaMaterial"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Nombre o categoria"
+            >
+          </label>
+          <label>
             Filas
             <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()">
               <option [ngValue]="5">5</option>
@@ -55,6 +64,86 @@ import { Categoria } from '../model/categoria';
         </div>
         <div class="repair-note" *ngIf="repairCount > 0">
           Aviso: {{ repairCount }} elemento(s) en reparacion.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <div>
+            <h3>Materiales</h3>
+            <p class="muted">{{ totalMateriales }} total, {{ materialesFiltrados.length }} visibles</p>
+          </div>
+        </div>
+
+        <table *ngIf="materialesFiltrados.length; else sinMateriales">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Categoria</th>
+              <th>Almacen</th>
+              <th>Ubicacion</th>
+              <th>Total</th>
+              <th>En reparacion</th>
+              <th>Tarifa dia</th>
+              <th>Reservado</th>
+              <th>Disponible</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of materialesPaginados">
+              <td>{{ m.nombre }}</td>
+              <td>
+                <select
+                  [(ngModel)]="m.categoria"
+                  (ngModelChange)="actualizarCategoriaMaterial(m)"
+                >
+                  <option *ngFor="let c of categoriasParaMaterial(m)" [value]="c">{{ c }}</option>
+                </select>
+              </td>
+              <td>{{ m.almacen }}</td>
+              <td>
+                <input
+                  class="inline-input"
+                  [(ngModel)]="m.ubicacionAlmacen"
+                  (blur)="actualizarUbicacion(m)"
+                >
+              </td>
+              <td>{{ m.stockTotal }}</td>
+              <td>
+                <input
+                  class="inline-input"
+                  type="number"
+                  min="0"
+                  [(ngModel)]="m.stockReparacion"
+                  (change)="actualizarStockReparacion(m)"
+                >
+              </td>
+              <td>
+                <input
+                  class="inline-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  [(ngModel)]="m.tarifaDia"
+                  (change)="actualizarTarifaDia(m)"
+                >
+              </td>
+              <td>{{ m.stockReservado }}</td>
+              <td>{{ m.stockDisponible }}</td>
+              <td><button class="btn-link" (click)="borrarMaterial(m.id)">Eliminar</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #sinMateriales>
+          <p class="muted">No hay materiales para mostrar.</p>
+        </ng-template>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="btn-link" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
+          <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+          <button class="btn-link" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
         </div>
       </section>
 
@@ -230,73 +319,6 @@ import { Categoria } from '../model/categoria';
                 <button class="btn-primary" (click)="agregarMaterial()">Agregar material</button>
               </div>
             </div>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Categoria</th>
-                  <th>Almacen</th>
-                  <th>Ubicacion</th>
-                  <th>Total</th>
-                  <th>En reparacion</th>
-                  <th>Tarifa dia</th>
-                  <th>Reservado</th>
-                  <th>Disponible</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let m of materialesPaginados">
-                  <td>{{ m.nombre }}</td>
-                  <td>
-                    <select
-                      [(ngModel)]="m.categoria"
-                      (ngModelChange)="actualizarCategoriaMaterial(m)"
-                    >
-                      <option *ngFor="let c of categoriasParaMaterial(m)" [value]="c">{{ c }}</option>
-                    </select>
-                  </td>
-                  <td>{{ m.almacen }}</td>
-                  <td>
-                    <input
-                      class="inline-input"
-                      [(ngModel)]="m.ubicacionAlmacen"
-                      (blur)="actualizarUbicacion(m)"
-                    >
-                  </td>
-                  <td>{{ m.stockTotal }}</td>
-                  <td>
-                    <input
-                      class="inline-input"
-                      type="number"
-                      min="0"
-                      [(ngModel)]="m.stockReparacion"
-                      (change)="actualizarStockReparacion(m)"
-                    >
-                  </td>
-                  <td>
-                    <input
-                      class="inline-input"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      [(ngModel)]="m.tarifaDia"
-                      (change)="actualizarTarifaDia(m)"
-                    >
-                  </td>
-                  <td>{{ m.stockReservado }}</td>
-                  <td>{{ m.stockDisponible }}</td>
-                  <td><button class="btn-link" (click)="borrarMaterial(m.id)">Eliminar</button></td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="pagination" *ngIf="totalPages > 1">
-              <button class="btn-link" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
-              <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-              <button class="btn-link" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
-            </div>
           </div>
         </div>
       </div>
@@ -310,7 +332,7 @@ import { Categoria } from '../model/categoria';
     .card { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
     .toolbar { margin-bottom: 1rem; }
     .toolbar label { display: inline-flex; gap: 10px; align-items: center; font-weight: 600; }
-    .toolbar select { padding: 0.4rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; }
+    .toolbar select, .toolbar input { padding: 0.4rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; }
     .toolbar { display: flex; gap: 16px; flex-wrap: wrap; }
     .almacen-toolbar { align-items: center; justify-content: space-between; margin-top: 12px; }
 
@@ -380,6 +402,7 @@ export class AlmacenComponent implements OnInit {
   almacenes: Almacen[] = [];
   categorias: Categoria[] = [];
   almacenFiltro = '';
+  busquedaMaterial = '';
   currentPage = 1;
   pageSize = 10;
   showAlmacenModal = false;
@@ -403,8 +426,25 @@ export class AlmacenComponent implements OnInit {
   }
 
   get materialesFiltrados(): Material[] {
-    if (!this.almacenFiltro) return this.materiales;
-    return this.materiales.filter(m => m.almacen === this.almacenFiltro);
+    const filtroAlmacen = this.almacenFiltro.trim().toLowerCase();
+    const filtroBusqueda = this.busquedaMaterial.trim().toLowerCase();
+
+    return this.materiales.filter(m => {
+      const almacen = (m.almacen ?? '').toLowerCase();
+      const nombre = (m.nombre ?? '').toLowerCase();
+      const categoria = (m.categoria ?? '').toLowerCase();
+      const coincideAlmacen = !filtroAlmacen || almacen === filtroAlmacen;
+      const coincideBusqueda =
+        !filtroBusqueda ||
+        nombre.includes(filtroBusqueda) ||
+        categoria.includes(filtroBusqueda);
+
+      return coincideAlmacen && coincideBusqueda;
+    });
+  }
+
+  get totalMateriales(): number {
+    return this.materiales.length;
   }
 
   get totalPages(): number {
@@ -440,6 +480,7 @@ export class AlmacenComponent implements OnInit {
 
   onFilterChange() {
     this.currentPage = 1;
+    this.inventarioPage = 1;
   }
 
   onPageSizeChange() {

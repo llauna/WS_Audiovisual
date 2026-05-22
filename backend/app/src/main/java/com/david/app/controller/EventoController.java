@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/eventos")
@@ -91,7 +92,7 @@ public class EventoController {
             String materialId = entry.getKey();
             int change = entry.getValue();
 
-            Material material = materialRepository.findById(materialId)
+            Material material = resolveMaterial(materialId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Material no encontrado"));
 
             int stockTotal = material.getStockTotal() == null ? 0 : material.getStockTotal();
@@ -110,5 +111,13 @@ public class EventoController {
             material.setStockDisponible(stockTotal - newReservado - stockReparacion);
             materialRepository.save(material);
         }
+    }
+
+    private Optional<Material> resolveMaterial(String materialKey) {
+        Optional<Material> byId = materialRepository.findById(materialKey);
+        if (byId.isPresent()) {
+            return byId;
+        }
+        return materialRepository.findFirstByNombreIgnoreCase(materialKey);
     }
 }

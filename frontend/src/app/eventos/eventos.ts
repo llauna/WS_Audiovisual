@@ -9,6 +9,7 @@ import { Personal } from '../model/personal';
 import { Cliente } from '../model/cliente';
 import { RegistroHoras } from '../model/registro-horas';
 import { NotaGasto } from '../model/nota-gasto';
+import { PresupuestoResumen } from '../services/api.service';
 
 interface CalendarCell {
   date: Date | null;      // null = hueco
@@ -24,19 +25,20 @@ interface CalendarCell {
     <div class="eventos-container">
       <header class="section-header">
         <div>
-          <h2>Agenda de Eventos</h2>
-          <p class="muted">Vista mensual (persistente en MongoDB)</p>
-        </div>
-
-        <div class="header-actions">
-          <a class="btn-secondary" routerLink="/">Inicio</a>
-          <button class="btn-primary" (click)="openNewEventModal()">+ Nuevo Evento</button>
+          <!-- Title moved to sidebar -->
         </div>
       </header>
 
       <div class="calendar-layout">
         <aside class="event-sidebar card">
-          <h3>Pr&oacute;ximos 7 d&iacute;as</h3>
+          <div class="sidebar-header">
+            <h2>Agenda de Eventos</h2>
+            <h4>Pr&oacute;ximos 7 d&iacute;as</h4>
+            <div class="sidebar-actions">
+              <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
+              <button class="btn-primary" (click)="openNewEventModal()">+ Nuevo Evento</button>
+            </div>
+          </div>
 
           <div class="mini-event-list" *ngIf="upcoming7.length > 0; else noUpcoming">
             <div class="mini-event-item" *ngFor="let e of upcoming7" (click)="openEditEvent(e)">
@@ -56,15 +58,15 @@ interface CalendarCell {
           </ng-template>
         </aside>
 
-        <main class="calendar-main card">
-          <div class="calendar-header">
+        <main class="calendar-main card" translate="no">
+          <div class="calendar-header" translate="no">
             <button class="btn-nav" (click)="prevMonth()">&#8249;</button>
-            <h3>{{ monthLabel }}</h3>
+            <h3 translate="no">{{ monthLabel }}</h3>
             <button class="btn-nav" (click)="nextMonth()">&#8250;</button>
           </div>
 
-          <div class="calendar-grid">
-            <div class="day-name" *ngFor="let day of dayNames">{{ day }}</div>
+          <div class="calendar-grid" translate="no">
+            <div class="day-name" *ngFor="let day of dayNames" translate="no">{{ day }}</div>
 
             <div
               class="day"
@@ -204,6 +206,59 @@ interface CalendarCell {
                 <strong>Diferencia:</strong> {{ diferenciaPresupuesto | number:'1.2-2' }}
               </div>
             </div>
+
+            <div class="budget-panel" *ngIf="presupuestoGuardadoSeleccionado as presupuesto; else sinPresupuestoGuardado">
+              <h4>Ultimo presupuesto guardado</h4>
+              <div class="quote-meta">
+                <div><strong>Estado:</strong> {{ presupuesto.estado || 'Pendiente' }}</div>
+                <div><strong>Fecha:</strong> {{ presupuesto.createdAt || '-' }}</div>
+                <div><strong>Coste material:</strong> {{ presupuesto.costeMateriales | number:'1.2-2' }}</div>
+                <div><strong>Coste tecnicos:</strong> {{ presupuesto.costeTecnicos | number:'1.2-2' }}</div>
+                <div><strong>Margen:</strong> {{ presupuesto.margenImporte | number:'1.2-2' }}</div>
+                <div><strong>Total:</strong> {{ presupuesto.importePresentado | number:'1.2-2' }}</div>
+              </div>
+
+              <table class="modern-table" *ngIf="presupuesto.materiales?.length">
+                <thead>
+                  <tr>
+                    <th>Material</th>
+                    <th>Unidades</th>
+                    <th>Tarifa</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let m of presupuesto.materiales ?? []">
+                    <td>{{ m.nombre }}</td>
+                    <td>{{ m.cantidad }}</td>
+                    <td>{{ m.tarifaDia | number:'1.2-2' }}</td>
+                    <td>{{ m.total | number:'1.2-2' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <table class="modern-table" *ngIf="presupuesto.tecnicos?.length">
+                <thead>
+                  <tr>
+                    <th>Tecnico</th>
+                    <th>Horas</th>
+                    <th>Tarifa</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let t of presupuesto.tecnicos ?? []">
+                    <td>{{ t.nombre }}</td>
+                    <td>{{ t.horas }}</td>
+                    <td>{{ t.tarifaHora | number:'1.2-2' }}</td>
+                    <td>{{ t.total | number:'1.2-2' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #sinPresupuestoGuardado>
+              <p class="muted">No hay presupuesto guardado para este evento.</p>
+            </ng-template>
           </div>
 
           <div class="tab-panel" *ngIf="activeTab === 'material'">
@@ -415,25 +470,25 @@ interface CalendarCell {
   `,
 
   styles: [`
-    .eventos-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .eventos-container { padding: 0.25rem; max-width: 100%; margin: 0 auto; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
     .header-actions { display: flex; align-items: center; gap: 12px; }
     .muted { color: #7a7a7a; margin: 0.25rem 0 0; }
 
-    .calendar-layout { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; }
+    .calendar-layout { display: grid; grid-template-columns: 320px 1fr; gap: 1rem; max-width: 100%; margin-top: 0; }
     .calendar-main { min-width: 0; }
-    .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .card { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-    .calendar-header { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-bottom: 1.5rem; }
+    .calendar-header { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-bottom: 0.75rem; }
     .btn-nav { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 18px; }
     .btn-nav:hover { background: #f7f7f7; }
 
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid #eee; border-radius: 10px; overflow: hidden; width: 100%; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid #eee; border-radius: 10px; overflow: hidden; width: 100%; min-width: 0; }
     .calendar-grid > * { min-width: 0; }
-    .day-name { padding: 10px; text-align: center; background: #f8f9fa; font-weight: 600; border-right: 1px solid #eee; }
+    .day-name { padding: 6px 4px; text-align: center; background: #f8f9fa; font-weight: 600; border-right: 1px solid #eee; font-size: 0.8rem; }
     .day-name:last-child { border-right: none; }
 
-    .day { min-height: 110px; padding: 8px; border-top: 1px solid #eee; border-right: 1px solid #eee; position: relative; background: #fff; }
+    .day { min-height: 65px; padding: 4px; border-top: 1px solid #eee; border-right: 1px solid #eee; position: relative; background: #fff; }
     .day:nth-child(7n) { border-right: none; }
     .day.empty { background: #fcfcfc; }
     .day.today { outline: 2px solid rgba(46, 134, 222, 0.35); outline-offset: -2px; }
@@ -452,7 +507,7 @@ interface CalendarCell {
       color: white;
       cursor: pointer;
     }
-    .event-title { display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+    .event-title { display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
     .event-delete {
       border: none;
       background: rgba(255,255,255,0.2);
@@ -466,6 +521,17 @@ interface CalendarCell {
     }
     .event-delete:hover { background: rgba(255,255,255,0.35); }
 
+    .sidebar-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .sidebar-actions {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+    }
     .blue { background: #3498db; }
     .orange { background: #e67e22; }
     .green { background: #27ae60; }
@@ -662,6 +728,8 @@ interface CalendarCell {
     .btn-link { background: none; border: none; color: #2c3e50; cursor: pointer; margin-right: 8px; }
     .btn-link.danger { color: #c0392b; }
     .summary { margin: 0.5rem 0 1rem; padding: 0.75rem 1rem; background: #f8f9fb; border-radius: 10px; }
+    .budget-panel { margin-top: 1rem; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; }
+    .budget-panel h4 { margin: 0 0 0.75rem; }
     .summary .positive { color: #1b7b3a; }
     .summary .negative { color: #b00020; }
     .errors { margin-top: 1rem; color: #b00020; font-weight: 600; }
@@ -686,17 +754,120 @@ interface CalendarCell {
       border-bottom: 1px solid #eee;
       font-size: 0.85rem;
     }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .calendar-layout {
+        grid-template-columns: 280px 1fr;
+        gap: 1rem;
+      }
+      .eventos-container {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 968px) {
+      .calendar-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .event-sidebar {
+        order: 2;
+      }
+      .calendar-main {
+        order: 1;
+      }
+      .day {
+        min-height: 60px;
+        padding: 3px;
+      }
+      .event-title {
+        max-width: 80px;
+        font-size: 0.7rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .eventos-container {
+        padding: 0.5rem;
+      }
+      .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+      .header-actions {
+        justify-content: center;
+      }
+      .calendar-header {
+        gap: 1rem;
+      }
+      .day {
+        min-height: 55px;
+        padding: 2px;
+      }
+      .day-name {
+        padding: 6px;
+        font-size: 0.8rem;
+      }
+      .event-tag {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+        margin-top: 3px;
+      }
+      .event-title {
+        max-width: 60px;
+        font-size: 0.65rem;
+      }
+      .card {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .eventos-container {
+        padding: 0.25rem;
+      }
+      .day {
+        min-height: 45px;
+        padding: 2px;
+      }
+      .event-tag {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+      }
+      .event-title {
+        max-width: 50px;
+        font-size: 0.6rem;
+      }
+      .btn-nav {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+      .legend {
+        gap: 4px;
+      }
+      .pill {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+      }
+    }
   `]
 })
-export class EventosComponent {
-  readonly dayNames = ['Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b', 'Dom'];
-  currentMonth = this.startOfMonth(new Date());
+class EventosComponent {
+  private readonly _dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  get dayNames(): readonly string[] {
+    return Object.freeze([...this._dayNames]);
+  }
+  currentMonth!: Date;
   todayIso = this.toIsoDate(new Date());
 
   eventos: Evento[] = [];
   materiales: Material[] = [];
   personal: Personal[] = [];
   clientes: Cliente[] = [];
+  presupuestos: PresupuestoResumen[] = [];
   registrosEvento: RegistroHoras[] = [];
   nuevoRegistroEvento: RegistroHoras = this.resetRegistroEvento();
   notasGasto: NotaGasto[] = [];
@@ -708,16 +879,25 @@ export class EventosComponent {
   activeTab: 'datos' | 'material' | 'tecnicos' | 'horas' | 'gastos' = 'datos';
 
   constructor(private api: ApiService) {
+    this.currentMonth = this.startOfMonth(new Date());
     this.loadEventos();
     this.loadMateriales();
     this.loadPersonal();
     this.loadClientes();
+    this.loadPresupuestos();
   }
 
   loadEventos(): void {
     this.api.getEventos().subscribe({
       next: (data) => this.eventos = data ?? [],
       error: (e) => console.error('Error cargando eventos:', e)
+    });
+  }
+
+  private loadPresupuestos(): void {
+    this.api.getPresupuestosGuardados().subscribe({
+      next: (data) => this.presupuestos = data ?? [],
+      error: (e) => console.error('Error cargando presupuestos:', e)
     });
   }
 
@@ -846,6 +1026,15 @@ export class EventosComponent {
   get diferenciaPresupuesto(): number | null {
     if (this.newEvent.presupuestoPresentado == null) return null;
     return (this.newEvent.presupuestoPresentado ?? 0) - this.presupuestoCalculado;
+  }
+
+  get presupuestoGuardadoSeleccionado(): PresupuestoResumen | undefined {
+    const id = this.newEvent.id;
+    if (!id) return undefined;
+    const encontrados = (this.presupuestos ?? [])
+      .filter(p => p.eventoId === id)
+      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+    return encontrados[0];
   }
 
   get totalMaterialesCoste(): number {
@@ -1211,3 +1400,5 @@ export class EventosComponent {
     });
   }
 }
+
+export default EventosComponent

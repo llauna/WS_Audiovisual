@@ -1,20 +1,50 @@
 import { Routes } from '@angular/router';
 import { Dashboard } from './dashboard/dashboard';
 import { AlmacenComponent } from './almacen/almacen';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: Dashboard },
-  { path: 'almacen', component: AlmacenComponent },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', loadComponent: () => import('./login/login').then(m => m.LoginComponent) },
   {
-    path: 'eventos',
-    loadComponent: () => import('./eventos/eventos').then(m => m.EventosComponent)
+    path: 'dashboard',
+    loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard),
+    canActivate: [authGuard]
   },
-  { path: 'presupuestos', loadComponent: () => import('./presupuestos/presupuestos').then(m => m.PresupuestosComponent) },
-  { path: 'personal',
-  loadComponent: () => import('./personal/personal').then(m => m.PersonalComponent) },
-  { path: 'nominas', loadComponent: () => import('./nominas/nominas').then(m => m.NominasComponent) },
-  { path: 'mantenimiento', loadComponent: () => import('./mantenimiento/mantenimiento').then(m => m.MantenimientoComponent) },
-  { path: 'configuracion', loadComponent: () => import('./configuracion/configuracion').then(m => m.ConfiguracionComponent) },
-  { path: '**', redirectTo: '' }
+  {
+    path: 'almacen',
+    component: AlmacenComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'eventos',
+    loadComponent: () => import('./eventos/eventos').then(m => m.default),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'presupuestos',
+    loadComponent: () => import('./presupuestos/presupuestos').then(m => m.PresupuestosComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'personal',
+    loadComponent: () => import('./personal/personal').then(m => m.PersonalComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'nominas',
+    loadComponent: () => import('./nominas/nominas').then(m => m.NominasComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'mantenimiento',
+    loadComponent: () => import('./mantenimiento/mantenimiento').then(m => m.MantenimientoComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'configuracion',
+    loadComponent: () => import('./configuracion/configuracion').then(m => m.ConfiguracionComponent),
+    canActivate: [authGuard]
+  },
+  { path: '**', redirectTo: '/login' }
 ];

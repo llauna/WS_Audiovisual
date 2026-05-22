@@ -74,7 +74,7 @@ export class LoginComponent {
       next: () => {
         this.loading = false;
         this.password = '';
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.errorMessage = err?.error?.message || 'No se pudo iniciar sesi\u00f3n';

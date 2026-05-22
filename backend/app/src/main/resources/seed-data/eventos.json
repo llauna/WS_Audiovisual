@@ -1,0 +1,178 @@
+[
+  {
+    "titulo": "Grabación Programa \"El Hormiguero\"",
+    "ubicacion": "Estudios Antena 3, San Sebastián de los Reyes",
+    "clienteId": "cliente-1",
+    "fecha": "2026-05-15",
+    "tipo": "Evento",
+    "color": "blue",
+    "descripcion": "Grabación semanal del programa de entretenimiento con invitados especiales",
+    "presupuesto": 5000.00,
+    "presupuestoPresentado": 5500.00,
+    "presupuestoEstado": "Aceptado",
+    "tecnicos": 8,
+    "dias": 1,
+    "jornadas": 1,
+    "modoCalculo": "Dias",
+    "materiales": [
+      { "materialId": "mat-1", "nombre": "Cámara Sony FX9", "cantidad": 3 },
+      { "materialId": "mat-2", "nombre": "Trípode Manfrotto 504HD", "cantidad": 3 },
+      { "materialId": "mat-3", "nombre": "Monitor Sony OLED 7\"", "cantidad": 2 },
+      { "materialId": "mat-4", "nombre": "Micrófono Sennheiser MKH 416", "cantidad": 4 },
+      { "materialId": "mat-6", "nombre": "Grabadora Sound Devices MixPre-6", "cantidad": 1 }
+    ],
+    "tecnicosDetalle": [
+      { "personalId": "per-1", "nombre": "Juan García López", "horas": 8.0, "tarifaHora": 45.00 },
+      { "personalId": "per-2", "nombre": "María Rodríguez Sánchez", "horas": 8.0, "tarifaHora": 40.00 },
+      { "personalId": "per-3", "nombre": "Carlos Martínez Pérez", "horas": 8.0, "tarifaHora": 35.00 },
+      { "personalId": "per-4", "nombre": "Ana López Gómez", "horas": 8.0, "tarifaHora": 30.00 },
+      { "personalId": "per-5", "nombre": "Miguel Sánchez Martín", "horas": 8.0, "tarifaHora": 32.00 },
+      { "personalId": "per-6", "nombre": "Laura Fernández Díaz", "horas": 4.0, "tarifaHora": 28.00 },
+      { "personalId": "per-8", "nombre": "Sofía Moreno Herrera", "horas": 8.0, "tarifaHora": 22.00 },
+      { "personalId": "per-9", "nombre": "Pablo Alvarez Castro", "horas": 8.0, "tarifaHora": 26.00 }
+    ]
+  },
+  {
+    "titulo": "Montaje Set de Iluminación Teatro Real",
+    "ubicacion": "Teatro Real, Madrid",
+    "clienteId": "cliente-2",
+    "fecha": "2026-05-18",
+    "tipo": "Montaje",
+    "color": "orange",
+    "descripcion": "Montaje completo de iluminación para la ópera \"La Traviata\"",
+    "presupuesto": 3500.00,
+    "presupuestoPresentado": 3500.00,
+    "presupuestoEstado": "Pendiente",
+    "tecnicos": 4,
+    "dias": 2,
+    "jornadas": 2,
+    "modoCalculo": "Dias",
+    "materiales": [
+      { "materialId": "mat-5", "nombre": "Set de luces LED ARRI SkyPanel", "cantidad": 4 },
+      { "materialId": "mat-2", "nombre": "Trípode Manfrotto 504HD", "cantidad": 2 }
+    ],
+    "tecnicosDetalle": [
+      { "personalId": "per-5", "nombre": "Miguel Sánchez Martín", "horas": 16.0, "tarifaHora": 32.00 },
+      { "personalId": "per-9", "nombre": "Pablo Alvarez Castro", "horas": 16.0, "tarifaHora": 26.00 },
+      { "personalId": "per-3", "nombre": "Carlos Martínez Pérez", "horas": 8.0, "tarifaHora": 35.00 },
+      { "personalId": "per-8", "nombre": "Sofía Moreno Herrera", "horas": 16.0, "tarifaHora": 22.00 }
+    ]
+  },
+  {
+    "titulo": "Ensayo Cámaras Documental \"España Oculta\"",
+    "ubicacion": "Plaza Mayor, Madrid",
+    "clienteId": "cliente-3",
+    "fecha": "2026-05-20",
+    "tipo": "Ensayo",
+    "color": "green",
+    "descripcion": "Ensayo técnico para grabación de documental en exteriores",
+    "presupuesto": 1200.00,
+    "presupuestoPresentado": null,
+    "presupuestoEstado": null,
+    "tecnicos": 3,
+    "dias": 1,
+    "jornadas": 1,
+    "modoCalculo": "Dias",
+    "materiales": [
+      { "materialId": "mat-1", "nombre": "Cámara Sony FX9", "cantidad": 2 },
+      { "materialId": "mat-7", "nombre": "Objetivo Canon 24-70mm f/2.8", "cantidad": 2 },
+      { "materialId": "mat-8", "nombre": "Dron DJI Inspire 2", "cantidad": 1 }
+    ],
+    "tecnicosDetalle": [
+      { "personalId": "per-10", "nombre": "Elena Romero Gil", "horas": 6.0, "tarifaHora": 50.00 },
+      { "personalId": "per-3", "nombre": "Carlos Martínez Pérez", "horas": 6.0, "tarifaHora": 35.00 },
+      { "personalId": "per-9", "nombre": "Pablo Alvarez Castro", "horas": 6.0, "tarifaHora": 26.00 }
+    ]
+  },
+  {
+    "titulo": "Retransmisión Fútbol LaLiga",
+    "ubicacion": "Estadio Santiago Bernabéu, Madrid",
+    "clienteId": "cliente-4",
+    "fecha": "2026-05-22",
+    "tipo": "Evento",
+    "color": "blue",
+    "descripcion": "Retransmisión en directo del partido Real Madrid vs Barcelona",
+    "presupuesto": 8500.00,
+    "presupuestoPresentado": 9000.00,
+    "presupuestoEstado": "Aceptado",
+    "tecnicos": 12,
+    "dias": 1,
+    "jornadas": 1,
+    "modoCalculo": "Dias",
+    "materiales": [
+      { "materialId": "mat-1", "nombre": "Cámara Sony FX9", "cantidad": 6 },
+      { "materialId": "mat-2", "nombre": "Trípode Manfrotto 504HD", "cantidad": 6 },
+      { "materialId": "mat-3", "nombre": "Monitor Sony OLED 7\"", "cantidad": 4 },
+      { "materialId": "mat-4", "nombre": "Micrófono Sennheiser MKH 416", "cantidad": 8 },
+      { "materialId": "mat-6", "nombre": "Grabadora Sound Devices MixPre-6", "cantidad": 2 },
+      { "materialId": "mat-8", "nombre": "Dron DJI Inspire 2", "cantidad": 1 }
+    ],
+    "tecnicosDetalle": [
+      { "personalId": "per-1", "nombre": "Juan García López", "horas": 10.0, "tarifaHora": 45.00 },
+      { "personalId": "per-2", "nombre": "María Rodríguez Sánchez", "horas": 10.0, "tarifaHora": 40.00 },
+      { "personalId": "per-3", "nombre": "Carlos Martínez Pérez", "horas": 10.0, "tarifaHora": 35.00 },
+      { "personalId": "per-4", "nombre": "Ana López Gómez", "horas": 10.0, "tarifaHora": 30.00 },
+      { "personalId": "per-5", "nombre": "Miguel Sánchez Martín", "horas": 8.0, "tarifaHora": 32.00 },
+      { "personalId": "per-7", "nombre": "David Jiménez Ruiz", "horas": 6.0, "tarifaHora": 38.00 },
+      { "personalId": "per-8", "nombre": "Sofía Moreno Herrera", "horas": 10.0, "tarifaHora": 22.00 },
+      { "personalId": "per-9", "nombre": "Pablo Alvarez Castro", "horas": 10.0, "tarifaHora": 26.00 },
+      { "personalId": "per-10", "nombre": "Elena Romero Gil", "horas": 10.0, "tarifaHora": 50.00 }
+    ]
+  },
+  {
+    "titulo": "Reunión Producción Serie \"Los Herederos\"",
+    "ubicacion": "Oficinas Netflix Madrid",
+    "clienteId": "cliente-5",
+    "fecha": "2026-05-25",
+    "tipo": "Otro",
+    "color": "purple",
+    "descripcion": "Reunión de planificación temporada 2",
+    "presupuesto": 300.00,
+    "presupuestoPresentado": 300.00,
+    "presupuestoEstado": "Aceptado",
+    "tecnicos": 2,
+    "dias": 1,
+    "jornadas": 1,
+    "modoCalculo": "Dias",
+    "materiales": [],
+    "tecnicosDetalle": [
+      { "personalId": "per-1", "nombre": "Juan García López", "horas": 3.0, "tarifaHora": 45.00 },
+      { "personalId": "per-2", "nombre": "María Rodríguez Sánchez", "horas": 3.0, "tarifaHora": 40.00 }
+    ]
+  },
+  {
+    "titulo": "Grabación Publicidad Coca-Cola",
+    "ubicacion": "Estudios Ciudad de la Luz, Alicante",
+    "clienteId": "cliente-6",
+    "fecha": "2026-05-28",
+    "tipo": "Evento",
+    "color": "blue",
+    "descripcion": "Grabación comercial para campaña de verano",
+    "presupuesto": 12000.00,
+    "presupuestoPresentado": 12500.00,
+    "presupuestoEstado": "Pendiente",
+    "tecnicos": 10,
+    "dias": 2,
+    "jornadas": 2,
+    "modoCalculo": "Dias",
+    "materiales": [
+      { "materialId": "mat-1", "nombre": "Cámara Sony FX9", "cantidad": 4 },
+      { "materialId": "mat-2", "nombre": "Trípode Manfrotto 504HD", "cantidad": 4 },
+      { "materialId": "mat-3", "nombre": "Monitor Sony OLED 7\"", "cantidad": 3 },
+      { "materialId": "mat-4", "nombre": "Micrófono Sennheiser MKH 416", "cantidad": 6 },
+      { "materialId": "mat-5", "nombre": "Set de luces LED ARRI SkyPanel", "cantidad": 3 },
+      { "materialId": "mat-6", "nombre": "Grabadora Sound Devices MixPre-6", "cantidad": 2 },
+      { "materialId": "mat-7", "nombre": "Objetivo Canon 24-70mm f/2.8", "cantidad": 4 }
+    ],
+    "tecnicosDetalle": [
+      { "personalId": "per-1", "nombre": "Juan García López", "horas": 16.0, "tarifaHora": 45.00 },
+      { "personalId": "per-2", "nombre": "María Rodríguez Sánchez", "horas": 16.0, "tarifaHora": 40.00 },
+      { "personalId": "per-3", "nombre": "Carlos Martínez Pérez", "horas": 16.0, "tarifaHora": 35.00 },
+      { "personalId": "per-4", "nombre": "Ana López Gómez", "horas": 16.0, "tarifaHora": 30.00 },
+      { "personalId": "per-5", "nombre": "Miguel Sánchez Martín", "horas": 12.0, "tarifaHora": 32.00 },
+      { "personalId": "per-6", "nombre": "Laura Fernández Díaz", "horas": 8.0, "tarifaHora": 28.00 },
+      { "personalId": "per-10", "nombre": "Elena Romero Gil", "horas": 16.0, "tarifaHora": 50.00 },
+      { "personalId": "per-9", "nombre": "Pablo Alvarez Castro", "horas": 16.0, "tarifaHora": 26.00 }
+    ]
+  }
+]

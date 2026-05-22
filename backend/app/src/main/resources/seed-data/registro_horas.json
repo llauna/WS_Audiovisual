@@ -1,0 +1,47 @@
+[
+  {
+    "eventoId": "evento-1",
+    "personalId": "per-1",
+    "fecha": "2026-05-15",
+    "horas": 8.0,
+    "tipo": "Plantilla",
+    "tarifaHora": 45.00,
+    "notas": "Dirección de producción programa"
+  },
+  {
+    "eventoId": "evento-1",
+    "personalId": "per-2",
+    "fecha": "2026-05-15",
+    "horas": 8.0,
+    "tipo": "Plantilla",
+    "tarifaHora": 40.00,
+    "notas": "Producción ejecutiva"
+  },
+  {
+    "eventoId": "evento-2",
+    "personalId": "per-5",
+    "fecha": "2026-05-18",
+    "horas": 8.0,
+    "tipo": "Plantilla",
+    "tarifaHora": 32.00,
+    "notas": "Montaje iluminación día 1"
+  },
+  {
+    "eventoId": "evento-2",
+    "personalId": "per-5",
+    "fecha": "2026-05-19",
+    "horas": 8.0,
+    "tipo": "Plantilla",
+    "tarifaHora": 32.00,
+    "notas": "Montaje iluminación día 2"
+  },
+  {
+    "eventoId": "evento-4",
+    "personalId": "per-10",
+    "fecha": "2026-05-22",
+    "horas": 10.0,
+    "tipo": "Extra",
+    "tarifaHora": 50.00,
+    "notas": "Dirección de fotografía retransmisión"
+  }
+]

@@ -83,7 +83,7 @@ import { RouterLink } from '@angular/router';
     .dashboard-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 3rem 1rem;
+      padding: 2rem 1rem;
       animation: fadeIn 0.5s ease-in;
     }
     @keyframes fadeIn {
@@ -92,7 +92,7 @@ import { RouterLink } from '@angular/router';
     }
     .dashboard-header {
       text-align: center;
-      margin-bottom: 3.5rem;
+      margin-bottom: 1.5rem;
     }
     .dashboard-header h1 {
       font-size: 2.5rem;
@@ -106,16 +106,17 @@ import { RouterLink } from '@angular/router';
     }
     .grid-menu {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 0.5rem;
     }
     .card {
       background: white;
-      border-radius: 16px;
-      padding: 1.8rem;
+      border-radius: 12px;
+      padding: 1rem;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 0.8rem;
       box-shadow: 0 4px 6px rgba(0,0,0,0.02);
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -129,26 +130,27 @@ import { RouterLink } from '@angular/router';
       border-color: transparent;
     }
     .card-icon {
-      font-size: 2.5rem;
+      font-size: 1.8rem;
       background: #f8fafc;
-      width: 70px;
-      height: 70px;
+      width: 45px;
+      height: 45px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 14px;
+      border-radius: 10px;
+      flex-shrink: 0;
     }
     .card-info h3 {
       margin: 0;
-      font-size: 1.25rem;
+      font-size: 0.95rem;
       color: #2d3748;
       font-weight: 600;
     }
     .card-info p {
-      margin: 0.4rem 0 0;
+      margin: 0.2rem 0 0;
       color: #718096;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.8rem;
+      line-height: 1.3;
     }
 
     /* Colores temáticos por tarjeta */
@@ -159,6 +161,78 @@ import { RouterLink } from '@angular/router';
     .card-nominas:hover { background: linear-gradient(to right, #fff, #f0fdf4); border-bottom: 4px solid #16a34a; }
     .card-mantenimiento:hover { background: linear-gradient(to right, #fff, #fff5f5); border-bottom: 4px solid #e53e3e; }
     .card-config:hover { background: linear-gradient(to right, #fff, #f7fafc); border-bottom: 4px solid #718096; }
+
+    /* Media queries para pantallas más pequeñas */
+    @media (max-width: 768px) {
+      .dashboard-container {
+        padding: 1rem 0.5rem;
+      }
+      
+      .dashboard-header {
+        margin-bottom: 1.5rem;
+      }
+      
+      .dashboard-header h1 {
+        font-size: 2rem;
+      }
+      
+      .dashboard-header p {
+        font-size: 1rem;
+      }
+      
+      .grid-menu {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .card {
+        padding: 0.8rem;
+        gap: 0.6rem;
+      }
+      
+      .card-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1.5rem;
+      }
+      
+      .card-info h3 {
+        font-size: 0.85rem;
+      }
+      
+      .card-info p {
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dashboard-container {
+        padding: 0.5rem;
+      }
+      
+      .dashboard-header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .grid-menu {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+      }
+      
+      .card {
+        padding: 0.6rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+      
+      .card-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 1.3rem;
+      }
+    }
   `]
 })
 export class Dashboard {}

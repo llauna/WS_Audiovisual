@@ -1,8 +1,8 @@
 .layout-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100%;
+  overflow: hidden;
 }
 
 .navbar {
@@ -13,6 +13,7 @@
   color: white;
   padding: 0 2rem;
   height: 60px;
+  flex-shrink: 0;
 
   .nav-logo { font-weight: bold; font-size: 1.2rem; }
 
@@ -41,6 +42,57 @@
     font-weight: 600;
   }
   .btn-exit:hover { background: #a93226; }
+}
+
+/* Media queries para navbar responsivo */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 1rem;
+    height: 50px;
+    
+    .nav-logo {
+      font-size: 1.1rem;
+    }
+    
+    .nav-links {
+      gap: 15px;
+      font-size: 0.9rem;
+    }
+    
+    .nav-actions {
+      gap: 8px;
+    }
+    
+    .btn-exit {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 0.5rem;
+    height: 45px;
+    
+    .nav-logo {
+      font-size: 1rem;
+    }
+    
+    .nav-links {
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+    
+    .nav-actions {
+      gap: 6px;
+    }
+    
+    .btn-exit {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
 }
 
 /* Estilos del Desplegable (Dropdown) */
@@ -72,13 +124,31 @@
 .content {
   flex: 1;
   padding: 20px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .footer {
   background-color: #ecf0f1;
-  padding: 20px;
+  padding: 15px 20px;
   text-align: center;
   border-top: 1px solid #bdc3c7;
+  flex-shrink: 0;
+}
+
+/* Media queries para footer responsivo */
+@media (max-width: 768px) {
+  .footer {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
 }
 
 .nav-status { font-size: 0.8rem; opacity: 0.8; }

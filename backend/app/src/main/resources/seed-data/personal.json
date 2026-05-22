@@ -1,0 +1,122 @@
+[
+  {
+    "nombre": "Juan",
+    "apellidos": "García López",
+    "dni": "12345678A",
+    "cargo": "Director de producción",
+    "telefono": "600123456",
+    "email": "juan.garcia@audiovisual.com",
+    "tipoContrato": "Plantilla",
+    "empresa": "Audiovisual Productions",
+    "estado": "Activo",
+    "tarifaHora": 45.00
+  },
+  {
+    "nombre": "María",
+    "apellidos": "Rodríguez Sánchez",
+    "dni": "87654321B",
+    "cargo": "Productor",
+    "telefono": "600234567",
+    "email": "maria.rodriguez@audiovisual.com",
+    "tipoContrato": "Plantilla",
+    "empresa": "Audiovisual Productions",
+    "estado": "Activo",
+    "tarifaHora": 40.00
+  },
+  {
+    "nombre": "Carlos",
+    "apellidos": "Martínez Pérez",
+    "dni": "11223344C",
+    "cargo": "Operador de cámara",
+    "telefono": "600345678",
+    "email": "carlos.martinez@audiovisual.com",
+    "tipoContrato": "Plantilla",
+    "empresa": "Audiovisual Productions",
+    "estado": "Activo",
+    "tarifaHora": 35.00
+  },
+  {
+    "nombre": "Ana",
+    "apellidos": "López Gómez",
+    "dni": "44332211D",
+    "cargo": "Técnico de sonido",
+    "telefono": "600456789",
+    "email": "ana.lopez@audiovisual.com",
+    "tipoContrato": "Autonomo",
+    "empresa": "Sonido Profesional SL",
+    "estado": "Activo",
+    "tarifaHora": 30.00
+  },
+  {
+    "nombre": "Miguel",
+    "apellidos": "Sánchez Martín",
+    "dni": "55667788E",
+    "cargo": "Técnico de iluminación",
+    "telefono": "600567890",
+    "email": "miguel.sanchez@audiovisual.com",
+    "tipoContrato": "Plantilla",
+    "empresa": "Audiovisual Productions",
+    "estado": "Activo",
+    "tarifaHora": 32.00
+  },
+  {
+    "nombre": "Laura",
+    "apellidos": "Fernández Díaz",
+    "dni": "99887766F",
+    "cargo": "Maquilladora",
+    "telefono": "600678901",
+    "email": "laura.fernandez@audiovisual.com",
+    "tipoContrato": "Autonomo",
+    "empresa": "Beauty Productions",
+    "estado": "Activo",
+    "tarifaHora": 28.00
+  },
+  {
+    "nombre": "David",
+    "apellidos": "Jiménez Ruiz",
+    "dni": "13579246G",
+    "cargo": "Editor de vídeo",
+    "telefono": "600789012",
+    "email": "david.jimenez@audiovisual.com",
+    "tipoContrato": "Plantilla",
+    "empresa": "Audiovisual Productions",
+    "estado": "Activo",
+    "tarifaHora": 38.00
+  },
+  {
+    "nombre": "Sofía",
+    "apellidos": "Moreno Herrera",
+    "dni": "24681357H",
+    "cargo": "Asistente de producción",
+    "telefono": "600890123",
+    "email": "sofia.moreno@audiovisual.com",
+    "tipoContrato": "Plantilla",
+    "empresa": "Audiovisual Productions",
+    "estado": "Activo",
+    "tarifaHora": 22.00
+  },
+  {
+    "nombre": "Pablo",
+    "apellidos": "Alvarez Castro",
+    "dni": "36925814I",
+    "cargo": "Grip",
+    "telefono": "600901234",
+    "email": "pablo.alvarez@audiovisual.com",
+    "tipoContrato": "Subcontratado",
+    "empresa": "Grip Services SL",
+    "estado": "Activo",
+    "tarifaHora": 26.00
+  },
+  {
+    "nombre": "Elena",
+    "apellidos": "Romero Gil",
+    "dni": "14725836J",
+    "cargo": "Director de fotografía",
+    "telefono": "600012345",
+    "email": "elena.romero@audiovisual.com",
+    "tipoContrato": "Autonomo",
+    "empresa": "DOP Freelance",
+    "estado": "Activo",
+    "tarifaHora": 50.00
+  }
+]

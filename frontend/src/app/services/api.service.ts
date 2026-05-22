@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, tap} from 'rxjs';
+import {Observable, tap, map, catchError, of} from 'rxjs';
 import { Material } from '../model/material';
 import { Personal } from '../model/personal';
 import { Evento } from '../model/evento';
@@ -12,6 +12,63 @@ import { Proveedor } from '../model/proveedor';
 import { Reparacion } from '../model/reparacion';
 import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
 import { Cliente } from '../model/cliente';
+
+export interface PresupuestoLineaMaterialResumen {
+  materialId?: string;
+  nombre?: string;
+  cantidad?: number;
+  tarifaDia?: number;
+  tarifa?: number;
+  precio?: number;
+  total?: number;
+}
+
+export interface PresupuestoLineaTecnicoResumen {
+  personalId?: string;
+  nombre?: string;
+  horas?: number;
+  tarifaHora?: number;
+  total?: number;
+}
+
+export interface PresupuestoDetalleResumen {
+  eventoId?: string;
+  eventoTitulo?: string;
+  modoCalculo?: string;
+  dias?: number;
+  jornadas?: number;
+  multiplicador?: number;
+  costeMateriales?: number;
+  costeTecnicos?: number;
+  costeBase?: number;
+  margenPct?: number;
+  margenImporte?: number;
+  total?: number;
+  materiales?: PresupuestoLineaMaterialResumen[];
+  tecnicos?: PresupuestoLineaTecnicoResumen[];
+}
+
+export interface PresupuestoResumen {
+  id?: string;
+  eventoId?: string;
+  eventoTitulo?: string;
+  clienteId?: string;
+  fechaEvento?: string;
+  modoCalculo?: string;
+  dias?: number;
+  jornadas?: number;
+  multiplicador?: number;
+  margenPct?: number;
+  costeMateriales?: number;
+  costeTecnicos?: number;
+  costeBase?: number;
+  margenImporte?: number;
+  importePresentado?: number;
+  estado?: string;
+  createdAt?: string;
+  materiales?: PresupuestoLineaMaterialResumen[];
+  tecnicos?: PresupuestoLineaTecnicoResumen[];
+}
 
 export interface AuthResponse {
   username: string;
@@ -39,6 +96,7 @@ export interface UsuarioRequest {
 })
 export class ApiService {
   private apiUrl = 'http://localhost:8081/api';
+  private _isAuthenticated = false;
 
   constructor(private http: HttpClient) { }
 
@@ -126,7 +184,11 @@ export class ApiService {
 
   // --- METODOS DE AUTH ---
   login(username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, { username, password });
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, { username, password }).pipe(
+      tap(response => {
+        this._isAuthenticated = response.authenticated;
+      })
+    );
   }
 
   me(): Observable<AuthResponse> {
@@ -134,7 +196,30 @@ export class ApiService {
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {});
+    return this.http.post<void>(`${this.apiUrl}/auth/logout`, {}).pipe(
+      tap(() => {
+        this._isAuthenticated = false;
+      })
+    );
+  }
+
+  isAuthenticated(): Observable<boolean> {
+    // Si ya sabemos que está autenticado localmente, retornar true inmediatamente
+    if (this._isAuthenticated) {
+      return of(true);
+    }
+    
+    // Si no, verificar con el backend
+    return this.me().pipe(
+      map(response => {
+        this._isAuthenticated = response.authenticated;
+        return response.authenticated;
+      }),
+      catchError(() => {
+        this._isAuthenticated = false;
+        return of(false);
+      })
+    );
   }
 
   // --- METODOS DE USUARIOS ---
@@ -169,6 +254,30 @@ export class ApiService {
 
   deleteEvento(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/eventos/${id}`);
+  }
+
+  calcularPresupuestoEvento(evento: Evento, margenPct = 0): Observable<PresupuestoDetalleResumen> {
+    return this.http.post<PresupuestoDetalleResumen>(
+      `${this.apiUrl}/presupuestos/calcular?margenPct=${encodeURIComponent(margenPct)}`,
+      evento
+    );
+  }
+
+  calcularPresupuestoDesdeEvento(id: string, margenPct = 0): Observable<PresupuestoDetalleResumen> {
+    return this.http.get<PresupuestoDetalleResumen>(
+      `${this.apiUrl}/presupuestos/eventos/${id}?margenPct=${encodeURIComponent(margenPct)}`
+    );
+  }
+
+  guardarPresupuestoDesdeEvento(id: string, margenPct = 0, estado = 'Pendiente'): Observable<PresupuestoResumen> {
+    return this.http.post<PresupuestoResumen>(
+      `${this.apiUrl}/presupuestos/eventos/${id}?margenPct=${encodeURIComponent(margenPct)}&estado=${encodeURIComponent(estado)}`,
+      {}
+    );
+  }
+
+  getPresupuestosGuardados(): Observable<PresupuestoResumen[]> {
+    return this.http.get<PresupuestoResumen[]>(`${this.apiUrl}/presupuestos`);
   }
 
   // --- METODOS DE CATEGORIAS ---

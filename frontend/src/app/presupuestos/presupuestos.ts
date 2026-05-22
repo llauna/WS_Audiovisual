@@ -8,6 +8,7 @@ import { Material } from '../model/material';
 import { SolicitudPresupuesto } from '../model/solicitud-presupuesto';
 import { Evento } from '../model/evento';
 import { Cliente } from '../model/cliente';
+import { PresupuestoResumen } from '../services/api.service';
 
 @Component({
   selector: 'app-presupuestos',
@@ -20,7 +21,7 @@ import { Cliente } from '../model/cliente';
           <h2>Presupuestos</h2>
           <p class="muted">Gestion comercial y cotizaciones</p>
         </div>
-        <a class="btn-secondary" routerLink="/">Inicio</a>
+        <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
       </header>
 
       <div class="cards-grid">
@@ -458,6 +459,7 @@ export class PresupuestosComponent implements OnInit {
   solicitudes: SolicitudPresupuesto[] = [];
   eventos: Evento[] = [];
   clientes: Cliente[] = [];
+  presupuestos: PresupuestoResumen[] = [];
   nuevaSolicitud: SolicitudPresupuesto = this.resetSolicitud();
   eventoSeleccionadoId = '';
   importePresentado = 0;
@@ -477,6 +479,7 @@ export class PresupuestosComponent implements OnInit {
     this.cargarSolicitudes();
     this.cargarEventos();
     this.cargarClientes();
+    this.cargarPresupuestos();
   }
 
   openSolicitudProveedorModal() {
@@ -488,11 +491,13 @@ export class PresupuestosComponent implements OnInit {
   }
 
   openPresupuestoClienteModal() {
+    this.resetPresupuestoClienteForm();
     this.showPresupuestoClienteModal = true;
   }
 
   closePresupuestoClienteModal() {
     this.showPresupuestoClienteModal = false;
+    this.resetPresupuestoClienteForm();
   }
 
   openSolicitudesRecientesModal() {
@@ -540,15 +545,14 @@ export class PresupuestosComponent implements OnInit {
   onEventoChange() {
     const evento = this.eventoSeleccionado;
     if (!evento) {
-      this.importePresentado = 0;
-      this.estadoPresupuesto = 'Pendiente';
-      this.granMargenPct = 0;
+      this.resetPresupuestoClienteForm(false);
       return;
     }
-    const base = this.presupuestoCalculadoEvento;
-    this.importePresentado = evento.presupuestoPresentado ?? base;
-    this.estadoPresupuesto = evento.presupuestoEstado ?? 'Pendiente';
-    this.granMargenPct = 0;
+    const presupuestoGuardado = this.presupuestoGuardadoSeleccionado;
+    this.granMargenPct = presupuestoGuardado?.margenPct ?? 0;
+    this.estadoPresupuesto = this.normalizeEstadoPresupuesto(
+      presupuestoGuardado?.estado ?? evento.presupuestoEstado
+    );
     this.syncImportePresentado();
   }
 
@@ -562,14 +566,20 @@ export class PresupuestosComponent implements OnInit {
       alert('El importe presentado debe ser mayor que 0');
       return;
     }
-    const payload: Evento = {
-      ...evento,
-      presupuestoPresentado: this.importePresentado,
-      presupuestoEstado: this.estadoPresupuesto
-    };
-    this.apiService.updateEvento(evento.id, payload).subscribe({
+    this.apiService.guardarPresupuestoDesdeEvento(evento.id, this.granMargenPct, this.estadoPresupuesto).subscribe({
       next: () => {
-        this.cargarEventos();
+        const payload: Evento = {
+          ...evento,
+          presupuestoPresentado: this.importePresentado,
+          presupuestoEstado: this.estadoPresupuesto
+        };
+        this.apiService.updateEvento(evento.id!, payload).subscribe({
+          next: () => {
+            this.cargarEventos();
+            this.cargarPresupuestos();
+          },
+          error: (err) => alert(err?.error?.message || 'No se pudo actualizar el evento')
+        });
       },
       error: (err) => alert(err?.error?.message || 'No se pudo guardar el presupuesto')
     });
@@ -603,6 +613,18 @@ export class PresupuestosComponent implements OnInit {
     });
   }
 
+  private cargarPresupuestos() {
+    this.apiService.getPresupuestosGuardados().subscribe({
+      next: (data) => {
+        this.presupuestos = data ?? [];
+        if (this.eventoSeleccionadoId) {
+          this.onEventoChange();
+        }
+      },
+      error: (err) => console.error('Error cargando presupuestos:', err)
+    });
+  }
+
   private cargarClientes() {
     this.apiService.getClientes().subscribe({
       next: (data) => this.clientes = data ?? [],
@@ -612,6 +634,15 @@ export class PresupuestosComponent implements OnInit {
 
   get eventoSeleccionado(): Evento | undefined {
     return this.eventos.find(e => e.id === this.eventoSeleccionadoId);
+  }
+
+  get presupuestoGuardadoSeleccionado(): PresupuestoResumen | undefined {
+    const id = this.eventoSeleccionado?.id;
+    if (!id) return undefined;
+    const encontrados = (this.presupuestos ?? [])
+      .filter(p => p.eventoId === id)
+      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+    return encontrados[0];
   }
 
   get clienteEventoSeleccionado(): string {
@@ -625,50 +656,28 @@ export class PresupuestosComponent implements OnInit {
   }
 
   get presupuestoCalculadoEvento(): number {
-    const evento = this.eventoSeleccionado;
-    if (!evento) return 0;
-    const multiplier = evento.modoCalculo === 'Jornadas'
-      ? (evento.jornadas ?? 1)
-      : (evento.dias ?? 1);
-
     return this.materialesCosteEvento + this.tecnicosCosteEvento;
   }
 
   get materialesCosteEvento(): number {
-    const evento = this.eventoSeleccionado;
-    if (!evento) return 0;
-    const multiplier = evento.modoCalculo === 'Jornadas'
-      ? (evento.jornadas ?? 1)
-      : (evento.dias ?? 1);
-    return (evento.materiales ?? []).reduce((acc, item) => {
-      if (!item.materialId || !item.cantidad) return acc;
-      const mat = this.materiales.find(m => m.id === item.materialId);
-      const tarifa = mat?.tarifaDia ?? 0;
-      return acc + item.cantidad * tarifa * multiplier;
-    }, 0);
+    return (this.materialesDetalle ?? []).reduce((acc, item) => acc + (item.total ?? 0), 0);
   }
 
   get tecnicosCosteEvento(): number {
-    const evento = this.eventoSeleccionado;
-    if (!evento) return 0;
-    const multiplier = evento.modoCalculo === 'Jornadas'
-      ? (evento.jornadas ?? 1)
-      : (evento.dias ?? 1);
-    return (evento.tecnicosDetalle ?? []).reduce((acc, t) => {
-      const horas = t.horas ?? 0;
-      const tarifa = t.tarifaHora ?? 0;
-      return acc + horas * tarifa * multiplier;
-    }, 0);
+    return (this.tecnicosDetalle ?? []).reduce((acc, item) => acc + (item.total ?? 0), 0);
   }
 
   get granMargenImporte(): number {
-    const base = this.presupuestoCalculadoEvento;
+    const baseGuardado = this.presupuestoGuardadoSeleccionado?.costeBase;
+    const base = baseGuardado != null && baseGuardado > 0 ? baseGuardado : this.presupuestoCalculadoEvento;
     const pct = this.granMargenPct ?? 0;
     return base * (pct / 100);
   }
 
   get totalConMargen(): number {
-    return this.presupuestoCalculadoEvento + this.granMargenImporte;
+    const baseGuardado = this.presupuestoGuardadoSeleccionado?.costeBase;
+    const base = baseGuardado != null && baseGuardado > 0 ? baseGuardado : this.presupuestoCalculadoEvento;
+    return base + this.granMargenImporte;
   }
 
   get duracionLabel(): string {
@@ -681,6 +690,32 @@ export class PresupuestosComponent implements OnInit {
   }
 
   get materialesDetalle(): { nombre: string; cantidad: number; tarifa: number; total: number; totalConMargen: number }[] {
+    const presupuestoGuardado = this.presupuestoGuardadoSeleccionado;
+    if (presupuestoGuardado?.materiales?.length) {
+      const marginFactor = 1 + ((this.granMargenPct ?? 0) / 100);
+      const evento = this.eventoSeleccionado;
+      const multiplier = presupuestoGuardado.multiplicador
+        ?? (evento?.modoCalculo === 'Jornadas'
+          ? (evento?.jornadas ?? 1)
+          : (evento?.dias ?? 1));
+      return (presupuestoGuardado.materiales ?? [])
+        .map(item => {
+          const material = this.resolveMaterial(item.materialId, item.nombre);
+          const cantidad = item.cantidad ?? 0;
+          const tarifa = this.resolveTarifaMaterialPresupuesto(item, material);
+          const total = (item.total != null && item.total > 0)
+            ? item.total
+            : cantidad * tarifa * multiplier;
+          return {
+            nombre: material?.nombre ?? item.nombre ?? 'Sin nombre',
+            cantidad,
+            tarifa,
+            total,
+            totalConMargen: total * marginFactor
+          };
+        })
+        .filter(item => item.cantidad > 0);
+    }
     const evento = this.eventoSeleccionado;
     if (!evento) return [];
     const multiplier = evento.modoCalculo === 'Jornadas'
@@ -688,7 +723,10 @@ export class PresupuestosComponent implements OnInit {
       : (evento.dias ?? 1);
     const marginFactor = 1 + ((this.granMargenPct ?? 0) / 100);
     return (evento.materiales ?? []).map(item => {
-      const mat = this.materiales.find(m => m.id === item.materialId);
+      if ((!item.materialId && !item.nombre) || !item.cantidad) {
+        return null;
+      }
+      const mat = this.resolveMaterial(item.materialId, item.nombre);
       const tarifa = mat?.tarifaDia ?? 0;
       const cantidad = item.cantidad ?? 0;
       const total = cantidad * tarifa * multiplier;
@@ -699,10 +737,23 @@ export class PresupuestosComponent implements OnInit {
         total,
         totalConMargen: total * marginFactor
       };
-    }).filter(m => m.cantidad > 0);
+    }).filter((m): m is { nombre: string; cantidad: number; tarifa: number; total: number; totalConMargen: number } => !!m && m.cantidad > 0);
   }
 
   get tecnicosDetalle(): { nombre: string; horas: number; tarifa: number; total: number; totalConMargen: number }[] {
+    const presupuestoGuardado = this.presupuestoGuardadoSeleccionado;
+    if (presupuestoGuardado?.tecnicos?.length) {
+      const marginFactor = 1 + ((this.granMargenPct ?? 0) / 100);
+      return (presupuestoGuardado.tecnicos ?? [])
+        .map(item => ({
+          nombre: item.nombre ?? 'Sin nombre',
+          horas: item.horas ?? 0,
+          tarifa: item.tarifaHora ?? 0,
+          total: item.total ?? 0,
+          totalConMargen: (item.total ?? 0) * marginFactor
+        }))
+        .filter(item => item.horas > 0);
+    }
     const evento = this.eventoSeleccionado;
     if (!evento) return [];
     const multiplier = evento.modoCalculo === 'Jornadas'
@@ -729,6 +780,36 @@ export class PresupuestosComponent implements OnInit {
 
   private syncImportePresentado() {
     this.importePresentado = this.totalConMargen;
+  }
+
+  private resetPresupuestoClienteForm(clearSelection = true) {
+    if (clearSelection) {
+      this.eventoSeleccionadoId = '';
+    }
+    this.importePresentado = 0;
+    this.estadoPresupuesto = 'Pendiente';
+    this.granMargenPct = 0;
+  }
+
+  private normalizeEstadoPresupuesto(
+    estado?: string | null
+  ): 'Pendiente' | 'Aceptado' | 'Rechazado' {
+    if (estado === 'Aceptado' || estado === 'Rechazado' || estado === 'Pendiente') {
+      return estado;
+    }
+    return 'Pendiente';
+  }
+
+  private resolveTarifaMaterialPresupuesto(
+    item: { materialId?: string; nombre?: string; cantidad?: number; tarifaDia?: number; tarifa?: number; precio?: number; total?: number },
+    material?: Material
+  ): number {
+    const cantidad = item.cantidad ?? 0;
+    const tarifaGuardada = item.tarifaDia ?? item.tarifa ?? item.precio;
+    if (tarifaGuardada != null && tarifaGuardada > 0) return tarifaGuardada;
+    if (material?.tarifaDia != null && material.tarifaDia > 0) return material.tarifaDia;
+    if (cantidad > 0 && item.total != null && item.total > 0) return item.total / cantidad;
+    return 0;
   }
 
   generarCorreoPresupuesto() {
@@ -782,8 +863,24 @@ export class PresupuestosComponent implements OnInit {
   }
 
   nombreMaterial(id?: string): string {
-    const material = this.materiales.find(m => m.id === id);
+    const material = this.materiales.find(m => m.id === id) ?? this.materiales.find(m => m.nombre === id);
     return material?.nombre || 'Desconocido';
+  }
+
+  private resolveMaterial(materialId?: string, nombre?: string): Material | undefined {
+    const targetId = this.normalizeLookup(materialId);
+    const targetName = this.normalizeLookup(nombre);
+    return this.materiales.find(m => this.normalizeLookup(m.id) === targetId)
+      ?? this.materiales.find(m => this.normalizeLookup(m.nombre) === targetId)
+      ?? this.materiales.find(m => this.normalizeLookup(m.nombre) === targetName);
+  }
+
+  private normalizeLookup(value?: string | null): string {
+    return (value ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   nombreProveedor(id?: string): string {

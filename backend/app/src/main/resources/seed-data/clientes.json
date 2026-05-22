@@ -1,0 +1,47 @@
+[
+  {
+    "nombre": "Televisión Española",
+    "nif": "A12345678",
+    "email": "produccion@rtve.es",
+    "telefono": "913462000",
+    "direccion": "Calle de los Prados, s/n, 28039 Madrid",
+    "contacto": "Ana García",
+    "notas": "Cliente habitual para programas de entretenimiento"
+  },
+  {
+    "nombre": "Antena 3",
+    "nif": "A87654321",
+    "email": "eventos@antena3.com",
+    "telefono": "914637000",
+    "direccion": "Calle de la Espartería, 3, 28013 Madrid",
+    "contacto": "Carlos Martínez",
+    "notas": "Especializado en retransmisiones deportivas"
+  },
+  {
+    "nombre": "Movistar+",
+    "nif": "A11223344",
+    "email": "produccion@movistar.es",
+    "telefono": "911900000",
+    "direccion": "Calle de la Gran Vía, 28, 28013 Madrid",
+    "contacto": "Laura Sánchez",
+    "notas": "Producciones originales y deportes"
+  },
+  {
+    "nombre": "Netflix España",
+    "nif": "A99887766",
+    "email": "spain@netflix.com",
+    "telefono": "900834000",
+    "direccion": "Calle de la Fuente, 12, 28023 Madrid",
+    "contacto": "Miguel Ángel Pérez",
+    "notas": "Series y documentales originales"
+  },
+  {
+    "nombre": "Amazon Prime Video",
+    "nif": "A55667788",
+    "email": "produccion.es@amazon.com",
+    "telefono": "911234567",
+    "direccion": "Paseo de la Castellana, 259, 28046 Madrid",
+    "contacto": "Sofía López",
+    "notas": "Producción de series y películas"
+  }
+]

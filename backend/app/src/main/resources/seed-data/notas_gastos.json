@@ -1,0 +1,34 @@
+[
+  {
+    "eventoId": "evento-1",
+    "productorId": "per-2",
+    "fecha": "2026-05-15",
+    "concepto": "Catering equipo grabación",
+    "importe": 150.00,
+    "estado": "Pagado"
+  },
+  {
+    "eventoId": "evento-2",
+    "productorId": "per-2",
+    "fecha": "2026-05-18",
+    "concepto": "Transporte material teatro",
+    "importe": 75.50,
+    "estado": "Pendiente"
+  },
+  {
+    "eventoId": "evento-4",
+    "productorId": "per-2",
+    "fecha": "2026-05-22",
+    "concepto": "Permisos grabación estadio",
+    "importe": 200.00,
+    "estado": "Pagado"
+  },
+  {
+    "eventoId": "evento-6",
+    "productorId": "per-2",
+    "fecha": "2026-05-28",
+    "concepto": "Alquiler estudio Alicante",
+    "importe": 1200.00,
+    "estado": "Pendiente"
+  }
+]

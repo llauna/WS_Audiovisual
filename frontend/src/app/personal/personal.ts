@@ -18,7 +18,7 @@ import { RegistroHoras } from '../model/registro-horas';
           <h2>Gestion de Personal</h2>
           <p>Administra tecnicos internos, autonomos y subcontratas</p>
         </div>
-        <a class="btn-secondary" routerLink="/">Inicio</a>
+        <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
       </header>
 
       <div class="form-container card">

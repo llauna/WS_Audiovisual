@@ -36,7 +36,7 @@ interface AutofacturaItem {
           <h2>Nominas y autofacturas</h2>
           <p class="muted">Resumen de horas y liquidaciones</p>
         </div>
-        <a class="btn-secondary" routerLink="/">Inicio</a>
+        <a class="btn-secondary" routerLink="/dashboard">Inicio</a>
       </header>
 
       <section class="card">
